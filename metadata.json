@@ -1,0 +1,6 @@
+{
+  "name": "NahwuLab",
+  "description": "Aplikasi pendalaman ilmu Nahwu dan Shorof dengan AI Gramatikal, Pustaka Kitab, Latihan I'rab, dan Pelacak Streak Belajar.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

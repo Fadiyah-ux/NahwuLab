@@ -1,0 +1,272 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile with learning streak and role information",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Unique user ID matching auth.uid",
+          "maxLength": 128
+        },
+        "email": {
+          "type": "string",
+          "description": "User email address",
+          "maxLength": 256
+        },
+        "displayName": {
+          "type": "string",
+          "description": "User display name",
+          "maxLength": 100
+        },
+        "photoURL": {
+          "type": "string",
+          "description": "User avatar image URL",
+          "maxLength": 1000
+        },
+        "role": {
+          "type": "string",
+          "description": "User role in the system",
+          "enum": ["admin", "student"]
+        },
+        "currentStreak": {
+          "type": "number",
+          "description": "Current consecutive days learning streak"
+        },
+        "longestStreak": {
+          "type": "number",
+          "description": "Longest recorded learning streak"
+        },
+        "lastLoginDate": {
+          "type": "string",
+          "description": "ISO date format YYYY-MM-DD of last activity",
+          "maxLength": 20
+        },
+        "totalExercisesCompleted": {
+          "type": "number",
+          "description": "Total number of completed exercises"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Account creation timestamp",
+          "maxLength": 64
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Account update timestamp",
+          "maxLength": 64
+        }
+      },
+      "required": ["uid", "email", "displayName", "role", "currentStreak", "longestStreak", "lastLoginDate"]
+    },
+    "StreakLog": {
+      "title": "StreakLog",
+      "description": "Daily streak and activity log for a user",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "User UID who logged the activity",
+          "maxLength": 128
+        },
+        "date": {
+          "type": "string",
+          "description": "Date format YYYY-MM-DD",
+          "maxLength": 20
+        },
+        "activityType": {
+          "type": "string",
+          "description": "Type of activity recorded",
+          "enum": ["chat", "exercise", "library", "login"]
+        },
+        "points": {
+          "type": "number",
+          "description": "Experience points earned"
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "ISO timestamp",
+          "maxLength": 64
+        }
+      },
+      "required": ["userId", "date", "activityType", "timestamp"]
+    },
+    "ChatMessage": {
+      "title": "ChatMessage",
+      "description": "Chat question and AI answer on Nahwu/Shorof",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique message ID",
+          "maxLength": 128
+        },
+        "userId": {
+          "type": "string",
+          "description": "Author UID",
+          "maxLength": 128
+        },
+        "role": {
+          "type": "string",
+          "description": "Message sender role",
+          "enum": ["user", "assistant"]
+        },
+        "content": {
+          "type": "string",
+          "description": "Content of the message",
+          "maxLength": 10000
+        },
+        "topic": {
+          "type": "string",
+          "description": "Topic of the question",
+          "enum": ["nahwu", "shorof", "irab", "umum"]
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "ISO timestamp",
+          "maxLength": 64
+        }
+      },
+      "required": ["id", "userId", "role", "content", "timestamp"]
+    },
+    "Exercise": {
+      "title": "Exercise",
+      "description": "Nahwu and Shorof training questions with I'rab explanations",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique exercise identifier",
+          "maxLength": 128
+        },
+        "title": {
+          "type": "string",
+          "description": "Exercise title",
+          "maxLength": 200
+        },
+        "category": {
+          "type": "string",
+          "description": "Exercise category",
+          "enum": ["nahwu", "shorof", "irab"]
+        },
+        "difficulty": {
+          "type": "string",
+          "description": "Difficulty level",
+          "enum": ["pemula", "menengah", "mahir"]
+        },
+        "question": {
+          "type": "string",
+          "description": "Question prompt",
+          "maxLength": 1000
+        },
+        "arabicSnippet": {
+          "type": "string",
+          "description": "Arabic sentence or word to analyze",
+          "maxLength": 500
+        },
+        "options": {
+          "type": "array",
+          "description": "Multiple choice answer options"
+        },
+        "correctAnswerIndex": {
+          "type": "number",
+          "description": "0-based index of correct option"
+        },
+        "explanation": {
+          "type": "string",
+          "description": "Detailed grammatical and morphological explanation",
+          "maxLength": 2000
+        },
+        "createdBy": {
+          "type": "string",
+          "description": "Admin UID who created the exercise",
+          "maxLength": 128
+        }
+      },
+      "required": ["id", "title", "category", "difficulty", "question", "options", "correctAnswerIndex", "explanation"]
+    },
+    "LibraryBook": {
+      "title": "LibraryBook",
+      "description": "Grammar and morphology book chapter or summary",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Book or section ID",
+          "maxLength": 128
+        },
+        "title": {
+          "type": "string",
+          "description": "Book title",
+          "maxLength": 200
+        },
+        "author": {
+          "type": "string",
+          "description": "Author of the book",
+          "maxLength": 200
+        },
+        "category": {
+          "type": "string",
+          "description": "Book category",
+          "enum": ["nahwu", "shorof", "irab", "kaidah"]
+        },
+        "description": {
+          "type": "string",
+          "description": "Book summary",
+          "maxLength": 1000
+        },
+        "level": {
+          "type": "string",
+          "description": "Target audience level",
+          "maxLength": 50
+        }
+      },
+      "required": ["id", "title", "author", "category", "description"]
+    },
+    "AdminRecord": {
+      "title": "AdminRecord",
+      "description": "Admin identifier lookup document",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Admin user UID",
+          "maxLength": 128
+        },
+        "email": {
+          "type": "string",
+          "description": "Admin email",
+          "maxLength": 256
+        }
+      },
+      "required": ["uid", "email"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Stores individual user profile and streak details"
+    },
+    "/users/{userId}/streakLogs/{date}": {
+      "schema": "StreakLog",
+      "description": "Daily streak logs for a specific user"
+    },
+    "/users/{userId}/chats/{chatId}": {
+      "schema": "ChatMessage",
+      "description": "AI consultation chat history for a specific user"
+    },
+    "/exercises/{exerciseId}": {
+      "schema": "Exercise",
+      "description": "Grammar exercises and quizzes"
+    },
+    "/library/{bookId}": {
+      "schema": "LibraryBook",
+      "description": "Reference books and texts for Nahwu and Shorof"
+    },
+    "/admins/{adminId}": {
+      "schema": "AdminRecord",
+      "description": "Document marking an admin user"
+    }
+  }
+}
