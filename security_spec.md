@@ -1,22 +1,22 @@
-# Security Specification: NahwuLab
+# Security Specification: NahwuLab (User-Isolated Access Control)
 
 ## 1. Data Invariants
-1. **User Identity Invariant**: A user document at `/users/{userId}` can only be read or written by the authenticated user whose `request.auth.uid == userId`, or read/managed by an admin.
-2. **Streak and Chat Ownership Invariant**: Subcollections `/users/{userId}/streakLogs/{date}` and `/users/{userId}/chats/{chatId}` are strictly owned by `{userId}`. An attacker cannot write logs or chat messages to another user's path.
-3. **Role Escalation Protection**: Regular users cannot promote themselves to `role: 'admin'`. Only authorized admins can write to `/admins/{adminId}` or set `role: 'admin'`.
-4. **Content Management Invariant**: Public learning content at `/exercises/{exerciseId}` and `/library/{bookId}` is readable by authenticated users, but writable only by admins.
-5. **Admin Identity**: Admin is determined by existence in `/admins/$(request.auth.uid)` or authenticated token email `izzahfadiyah649@gmail.com`.
+1. **Strict User Data Isolation**: A user at `/users/{userId}` and all nested subcollections `/users/{userId}/{document=**}` can **ONLY** be read or written by the authenticated user whose `request.auth.uid == userId`. Cross-user data access is mathematically blocked.
+2. **Immutable Identity**: When creating or updating a user document, `incoming().uid` must match `request.auth.uid`. An attacker cannot forge an owner UID.
+3. **Privilege Escalation Protection**: Regular users cannot promote themselves to `role: 'admin'`. Only the authorized administrator email (`izzahfadiyah649@gmail.com`) or designated admins in `/admins/` have admin privileges.
+4. **Learning Content Protection**: Public learning materials at `/exercises/{exerciseId}` and `/library/{bookId}` can be read by all authenticated users, but can **ONLY** be written, updated, or deleted by administrators.
+5. **Denial-of-Wallet & Type Guards**: String lengths, collection paths, and required schema attributes are strictly checked via validation functions (`isValidUser`, `isValidStreakLog`, `isValidChatMessage`, etc.).
 
-## 2. The Dirty Dozen Payloads (Designed to Break Identity, Integrity & State)
-1. **Identity Spoofing**: Attacker `user_xyz` writes to `/users/target_user` with `uid: "target_user"`. Expectation: PERMISSION_DENIED.
-2. **Self-Promotion to Admin**: Regular user updates their own profile `/users/{my_uid}` with `role: "admin"`. Expectation: PERMISSION_DENIED.
-3. **Ghost Field Poisoning**: Inserting unexpected schema field `{ backdoorAdmin: true }` into `/users/{my_uid}`. Expectation: PERMISSION_DENIED.
-4. **Chat History Theft**: User A queries `/users/UserB/chats` to eavesdrop on private AI queries. Expectation: PERMISSION_DENIED.
-5. **Cross-User Streak Forgery**: User A writes a streak log into `/users/UserB/streakLogs/2026-10-29`. Expectation: PERMISSION_DENIED.
-6. **Denial-of-Wallet Payload**: Inserting a 500KB string into chat content exceeding max limit. Expectation: PERMISSION_DENIED.
-7. **Unauthenticated Read of User PII**: Anonymous client requests `/users/target_user`. Expectation: PERMISSION_DENIED.
-8. **Malicious Exercise Injection**: Non-admin user creates an exercise at `/exercises/tampered_question`. Expectation: PERMISSION_DENIED.
-9. **Exercise Deletion Attack**: Student deletes `/exercises/ex_1`. Expectation: PERMISSION_DENIED.
-10. **Library Content Overwrite**: Student mutates Matan Al-Jurumiyyah text in `/library/jurumiyyah`. Expectation: PERMISSION_DENIED.
-11. **Admin Document Creation Attack**: Normal user writes to `/admins/{my_uid}`. Expectation: PERMISSION_DENIED.
-12. **Blanket Query Scraping**: Requesting list of all users without matching UID. Expectation: PERMISSION_DENIED.
+## 2. Dirty Dozen Payloads (Verified Blocked by Rules)
+1. **Cross-User Profile Read**: User `A` requests `/users/B` -> `PERMISSION_DENIED`.
+2. **Cross-User Profile Write**: User `A` tries to write to `/users/B` -> `PERMISSION_DENIED`.
+3. **Cross-User Chat Snooping**: User `A` queries `/users/B/chats` -> `PERMISSION_DENIED`.
+4. **Cross-User Streak Forgery**: User `A` writes streak log into `/users/B/streakLogs/2026-10-29` -> `PERMISSION_DENIED`.
+5. **Self-Promotion to Admin**: Student sends `{ role: 'admin' }` update to their profile -> `PERMISSION_DENIED`.
+6. **Unauthenticated Read**: Anonymous request to `/users/{anyId}` -> `PERMISSION_DENIED`.
+7. **Malicious Exercise Tampering**: Student tries to edit or delete `/exercises/ex_1` -> `PERMISSION_DENIED`.
+8. **Malicious Library Overwrite**: Student writes to `/library/matan-al-jurumiyyah` -> `PERMISSION_DENIED`.
+9. **Admin Collection Injection**: Student writes document to `/admins/{their_uid}` -> `PERMISSION_DENIED`.
+10. **Ghost Field Injection**: Adding arbitrary fields `{ isHacked: true }` to `/users/{userId}` -> `PERMISSION_DENIED`.
+11. **Oversized Payload Attack**: Writing 500KB string into chat content -> `PERMISSION_DENIED`.
+12. **Blanket Query Scraping**: Running unbounded list query over all users without matching UID -> `PERMISSION_DENIED`.

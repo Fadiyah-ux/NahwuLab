@@ -4,6 +4,7 @@ import { db } from '../firebase/config';
 import { collection, addDoc, getDocs } from 'firebase/firestore';
 import { ExerciseItem, ExerciseCategory, ExerciseDifficulty } from '../types';
 import { handleFirestoreError, OperationType } from '../firebase/errorHandler';
+import firebaseConfig from '../../firebase-applet-config.json';
 import {
   ShieldCheck,
   PlusCircle,
@@ -149,7 +150,7 @@ export const AdminTab: React.FC = () => {
           </div>
           <div>
             <span className="text-xs text-slate-400 block">Cloud Firestore</span>
-            <span className="text-sm font-bold text-slate-800">high-polymer-k01dl</span>
+            <span className="text-sm font-bold text-slate-800">{firebaseConfig.projectId}</span>
           </div>
         </div>
 

@@ -2,16 +2,17 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Default deny all
+    // Default deny all (Pillar 1: Zero Trust Catch-All)
     match /{document=**} {
       allow read, write: if false;
     }
 
-    // Helper functions
+    // Auth helpers
     function isSignedIn() {
       return request.auth != null;
     }
 
+    // Strict ownership verification: user can ONLY access their own data
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
@@ -38,7 +39,7 @@ service cloud.firestore {
     // Entity Validations
     function isValidUser(data) {
       return data.keys().hasAll(['uid', 'email', 'displayName', 'role', 'currentStreak', 'longestStreak', 'lastLoginDate']) &&
-        data.keys().hasOnly(['uid', 'email', 'displayName', 'photoURL', 'role', 'currentStreak', 'longestStreak', 'lastLoginDate', 'totalExercisesCompleted', 'createdAt', 'updatedAt']) &&
+        data.keys().hasOnly(['uid', 'email', 'displayName', 'photoURL', 'role', 'currentStreak', 'longestStreak', 'lastLoginDate', 'totalExercisesCompleted', 'xp', 'createdAt', 'updatedAt']) &&
         data.uid is string && data.uid.size() <= 128 &&
         data.email is string && data.email.size() <= 256 &&
         data.displayName is string && data.displayName.size() <= 100 &&
@@ -97,43 +98,53 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin() && isValidId(adminId);
     }
 
-    // Users Collection
+    // USER DATA ISOLATION: Each user can ONLY read and write their OWN data
     match /users/{userId} {
+      // User can only read their own document
       allow get: if isOwner(userId) || isAdmin();
       allow list: if isAdmin();
+
+      // User can only create their own profile matching their auth.uid
       allow create: if isOwner(userId) && isValidId(userId) && isValidUser(incoming()) && incoming().uid == request.auth.uid && (
         incoming().role == 'student' || isAdmin()
       );
+
+      // User can only update their own profile, cannot modify other users or elevate roles
       allow update: if isValidId(userId) && isValidUser(incoming()) && incoming().uid == existing().uid && (
         (isOwner(userId) && (
           incoming().role == existing().role &&
-          incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'photoURL', 'currentStreak', 'longestStreak', 'lastLoginDate', 'totalExercisesCompleted', 'updatedAt'])
+          incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'photoURL', 'currentStreak', 'longestStreak', 'lastLoginDate', 'totalExercisesCompleted', 'xp', 'updatedAt'])
         )) || isAdmin()
       );
+
       allow delete: if isAdmin();
 
-      // Subcollection: Streak logs
+      // Subcollection: Streak logs - Only owner can read/write their streak logs
       match /streakLogs/{date} {
         allow get, list: if isOwner(userId) || isAdmin();
         allow create, update: if isOwner(userId) && isValidId(date) && isValidStreakLog(incoming()) && incoming().userId == request.auth.uid;
         allow delete: if isOwner(userId) || isAdmin();
       }
 
-      // Subcollection: Chat history
+      // Subcollection: Chat history - Only owner can read/write their AI consultations
       match /chats/{chatId} {
         allow get, list: if isOwner(userId) || isAdmin();
         allow create, update: if isOwner(userId) && isValidId(chatId) && isValidChatMessage(incoming()) && incoming().userId == request.auth.uid;
         allow delete: if isOwner(userId) || isAdmin();
       }
+
+      // Any nested custom data under users/{userId} is strictly owned by userId
+      match /{allSubcollections=**} {
+        allow read, write: if isOwner(userId) || isAdmin();
+      }
     }
 
-    // Exercises Collection
+    // Shared Learning Content: Signed-in users can read, only admin can create/edit/delete
     match /exercises/{exerciseId} {
       allow get, list: if isSignedIn();
       allow create, update, delete: if isAdmin() && isValidId(exerciseId) && (request.method == 'delete' || isValidExercise(incoming()));
     }
 
-    // Library Collection
     match /library/{bookId} {
       allow get, list: if isSignedIn();
       allow create, update, delete: if isAdmin() && isValidId(bookId) && (request.method == 'delete' || isValidLibraryBook(incoming()));
