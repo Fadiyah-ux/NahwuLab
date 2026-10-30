@@ -15,7 +15,7 @@ import {
   Flame,
   Users,
   Award,
-  Sparkles,
+  Bot,
 } from 'lucide-react';
 
 export const AdminTab: React.FC = () => {
@@ -168,7 +168,7 @@ export const AdminTab: React.FC = () => {
 
         <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center gap-4">
           <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-bold">
-            <Sparkles className="w-5 h-5 text-amber-600" />
+            <Bot className="w-5 h-5 text-amber-600" />
           </div>
           <div>
             <span className="text-xs text-slate-400 block">Gemini AI Model</span>

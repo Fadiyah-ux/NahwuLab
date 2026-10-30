@@ -9,7 +9,6 @@ import {
   XCircle,
   HelpCircle,
   RotateCcw,
-  Sparkles,
   ChevronRight,
   Flame,
   ArrowRight,
@@ -303,7 +302,11 @@ export const ExerciseTab: React.FC = () => {
                 }`}
               >
                 <div className="flex items-center gap-2 font-bold text-xs uppercase tracking-wider mb-2">
-                  <Sparkles className="w-4 h-4" />
+                  {selectedAnswer === currentQ.correctAnswerIndex ? (
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  ) : (
+                    <HelpCircle className="w-4 h-4 text-amber-600" />
+                  )}
                   <span>
                     {selectedAnswer === currentQ.correctAnswerIndex
                       ? 'Jawaban Anda Tepat (Mumtaz)!'

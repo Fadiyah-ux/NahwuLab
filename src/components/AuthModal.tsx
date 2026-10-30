@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import {
-  Sparkles,
+  MessageSquare,
+  Bot,
   BookOpen,
   Award,
   Flame,
@@ -115,23 +116,22 @@ export const AuthModal: React.FC = () => {
           <div className="md:col-span-6 flex flex-col justify-between border-b md:border-b-0 md:border-r border-slate-700/60 pb-6 md:pb-0 md:pr-8">
             <div>
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 mb-4">
-                <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Teknologi AI & Kaidah Pesantren</span>
+                <span>Kurikulum Gramatika & Kaidah Pesantren</span>
               </div>
               <h2 className="text-xl sm:text-2xl font-bold text-white mb-3">
                 Kuasai Bahasa Arab dengan Presisi Tinggi
               </h2>
               <p className="text-sm text-slate-300 leading-relaxed mb-6">
-                Silakan masuk untuk mengakses seluruh modul pembelajaran, konsultasi AI, pustaka kitab matan, dan melacak rekor streak belajar harian Anda.
+                Silakan masuk untuk mengakses seluruh modul pembelajaran, Tanya Musyrif NahwuLab, pustaka kitab matan, dan melacak rekor streak belajar harian Anda.
               </p>
 
               <div className="space-y-3.5">
                 <div className="flex items-start gap-3">
                   <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
-                    <Sparkles className="w-4 h-4" />
+                    <MessageSquare className="w-4 h-4" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-semibold text-white">Konsultasi AI & I'rab Lengkap</h3>
+                    <h3 className="text-sm font-semibold text-white">Tanya Musyrif & I'rab Lengkap</h3>
                     <p className="text-xs text-slate-400">Bedah susunan gramatikal kata, tarkib, dan sighah shorof secara mendalam.</p>
                   </div>
                 </div>

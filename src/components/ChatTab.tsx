@@ -5,7 +5,6 @@ import { ChatMessageItem, SentenceAnalysisResult } from '../types';
 import { db } from '../firebase/config';
 import { collection, query, orderBy, limit, getDocs, addDoc } from 'firebase/firestore';
 import {
-  Sparkles,
   Send,
   Bot,
   User,
@@ -15,7 +14,6 @@ import {
   BookOpen,
   HelpCircle,
   Layers,
-  Sparkle,
   ArrowRight,
   Info,
 } from 'lucide-react';
@@ -86,7 +84,7 @@ export const ChatTab: React.FC = () => {
           id: 'welcome',
           userId: userProfile?.uid || 'guest',
           role: 'assistant',
-          content: `**Assalamu'alaikum wa rahmatullahi wa barakatuh.**\n\nAhlan wa Sahlan di **Ustadz NahwuLab**! Saya adalah asisten cerdas pembelajaran bahasa Arab, siap menjawab langsung sesuai bentuk instruksi yang Anda butuhkan:\n\n- 📝 **Contoh Kalimat/Kata**: Minta contoh kalimat atau kata berharakat beserta terjemahannya.\n- 💡 **Definisi & Ciri-Ciri**: Pengertian istilah nahwu, sharaf, fungsi, atau macam-macam pembagiannya.\n- ⚖️ **Perbedaan Konsep**: Membandingkan dua istilah (misal: Fa'il vs Na'ibul Fa'il, Isim vs Fi'il).\n- 🔍 **Analisis I'rab & Tarkib**: Kirimkan kalimat bahasa Arab untuk diuraikan kedudukan dan harakat akhirnya.\n- 📚 **Rangkuman Sederhana**: Minta penjelasan kaidah dengan bahasa yang mudah dipahami santri/pemula.\n\n*Silakan ketik pertanyaan Anda secara bebas atau klik salah satu kartu pintasan di samping!*`,
+          content: `**Assalamu'alaikum wa rahmatullahi wa barakatuh.**\n\nAhlan wa Sahlan di **Tanya Musyrif NahwuLab**! Saya adalah asisten pembelajaran bahasa Arab, siap menjawab langsung sesuai bentuk instruksi yang Anda butuhkan:\n\n- 📝 **Contoh Kalimat/Kata**: Minta contoh kalimat atau kata berharakat beserta terjemahannya.\n- 💡 **Definisi & Ciri-Ciri**: Pengertian istilah nahwu, sharaf, fungsi, atau macam-macam pembagiannya.\n- ⚖️ **Perbedaan Konsep**: Membandingkan dua istilah (misal: Fa'il vs Na'ibul Fa'il, Isim vs Fi'il).\n- 🔍 **Analisis I'rab & Tarkib**: Kirimkan kalimat bahasa Arab untuk diuraikan kedudukan dan harakat akhirnya.\n- 📚 **Rangkuman Sederhana**: Minta penjelasan kaidah dengan bahasa yang mudah dipahami santri/pemula.\n\n*Silakan ketik pertanyaan Anda secara bebas atau klik salah satu kartu pintasan di samping!*`,
           timestamp: new Date().toISOString(),
         },
       ]);
@@ -191,12 +189,8 @@ export const ChatTab: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       {/* Top Banner / Mode Switcher */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-gradient-to-r from-emerald-900 via-teal-900 to-slate-900 p-6 rounded-3xl text-white shadow-xl shadow-emerald-950/20 mb-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gradient-to-r from-emerald-900 via-teal-900 to-slate-900 p-6 sm:p-7 rounded-3xl text-white shadow-xl shadow-emerald-950/20 mb-6">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 mb-2">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Al-Mursyid Al-Lughawiy • Pakar Nahwu AI</span>
-          </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
             Konsultasi & Bedah I'rab Digital
           </h1>
@@ -216,7 +210,7 @@ export const ChatTab: React.FC = () => {
             }`}
           >
             <Bot className="w-4 h-4" />
-            <span>Tanya Ustadz AI</span>
+            <span>Tanya Musyrif NahwuLab</span>
           </button>
           <button
             onClick={() => {
@@ -248,7 +242,7 @@ export const ChatTab: React.FC = () => {
                   <Bot className="w-5 h-5 text-emerald-700" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-slate-800">Ustadz NahwuLab (AI Mursyid)</h3>
+                  <h3 className="text-sm font-bold text-slate-800">Tanya Musyrif NahwuLab</h3>
                   <div className="flex items-center gap-1.5 text-xs text-slate-500">
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                     <span>Aktif & Berpedoman pada Kaidah Mu'tamad</span>
@@ -357,7 +351,7 @@ export const ChatTab: React.FC = () => {
                     <span className="w-2 h-2 rounded-full bg-emerald-600 animate-bounce [animation-delay:0.2s]"></span>
                     <span className="w-2 h-2 rounded-full bg-emerald-600 animate-bounce [animation-delay:0.4s]"></span>
                     <span className="text-xs text-slate-500 font-medium ml-1">
-                      Ustadz NahwuLab sedang menelaah kaidah gramatika...
+                      Musyrif NahwuLab sedang menelaah kaidah gramatika...
                     </span>
                   </div>
                 </div>
@@ -400,7 +394,7 @@ export const ChatTab: React.FC = () => {
             {/* Quick Prompt Chips */}
             <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm">
               <div className="flex items-center gap-2 text-slate-800 font-bold text-sm mb-3">
-                <Sparkle className="w-4 h-4 text-emerald-600" />
+                <HelpCircle className="w-4 h-4 text-emerald-600" />
                 <span>Pintasan Tanya Kaidah Populer</span>
               </div>
               <p className="text-xs text-slate-500 mb-4">

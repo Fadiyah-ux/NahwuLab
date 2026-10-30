@@ -9,7 +9,6 @@ import {
   Trophy,
   Zap,
   Target,
-  Sparkles,
   BookOpen,
   MessageSquare,
   ShieldAlert,
@@ -125,7 +124,7 @@ export const StreakTab: React.FC = () => {
             </div>
 
             <p className="text-xs text-slate-500 mb-4">
-              Tingkatkan XP Anda dengan menyelesaikan latihan I'rab, membaca materi kitab, dan berkonsultasi dengan Ustadz AI.
+              Tingkatkan XP Anda dengan menyelesaikan latihan I'rab, membaca materi kitab, dan berkonsultasi dengan Tanya Musyrif NahwuLab.
             </p>
 
             {/* Progress Bar */}
@@ -207,7 +206,7 @@ export const StreakTab: React.FC = () => {
               <MessageSquare className="w-4 h-4" />
             </div>
             <div>
-              <h4 className="text-sm font-bold text-emerald-950">1x Konsultasi AI</h4>
+              <h4 className="text-sm font-bold text-emerald-950">1x Tanya Musyrif NahwuLab</h4>
               <p className="text-xs text-emerald-700 mt-0.5">Tanyakan 1 kaidah atau bedah kalimat I'rab.</p>
               <span className="inline-block mt-2 text-[10px] font-bold text-emerald-800 bg-white px-2 py-0.5 rounded border border-emerald-300">
                 +10 XP

@@ -8,7 +8,6 @@ import {
   ShieldCheck,
   LogOut,
   User,
-  Sparkles,
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -20,7 +19,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
   const { userProfile, isAdmin, logout } = useAuth();
 
   const navItems = [
-    { id: 'chat', label: 'Tanya AI & I\'rab', icon: MessageSquare, arabic: 'الْمُعَلِّمُ الذَّكِيُّ' },
+    { id: 'chat', label: 'Tanya Musyrif NahwuLab', icon: MessageSquare, arabic: 'مُشْرِفُ نَحْوِ لَاب' },
     { id: 'library', label: 'Pustaka Kitab', icon: BookOpen, arabic: 'الْمَكْتَبَةُ' },
     { id: 'exercises', label: 'Latihan & Kuis', icon: Award, arabic: 'التَّمْرِينَاتُ' },
     { id: 'streak', label: 'Streak Belajar', icon: Flame, arabic: 'الْمُوَاظَبَةُ' },

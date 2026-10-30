@@ -11,7 +11,6 @@ import {
   Copy,
   Check,
   Volume2,
-  Sparkles,
   BookA,
   ArrowLeft,
   Bookmark,
@@ -336,7 +335,7 @@ export const LibraryTab: React.FC = () => {
                 {selectedChapter.keyPoints && selectedChapter.keyPoints.length > 0 && (
                   <div className="p-5 rounded-2xl bg-emerald-50/60 border border-emerald-200/80">
                     <h4 className="text-xs font-bold text-emerald-900 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                      <Bookmark className="w-3.5 h-3.5 text-emerald-600" />
                       <span>Poin-Poin Penting & Kaidah Penunjang</span>
                     </h4>
                     <ul className="space-y-2 text-xs sm:text-sm text-emerald-900">
