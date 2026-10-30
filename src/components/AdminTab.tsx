@@ -172,7 +172,7 @@ export const AdminTab: React.FC = () => {
           </div>
           <div>
             <span className="text-xs text-slate-400 block">Gemini AI Model</span>
-            <span className="text-sm font-bold text-slate-800">gemini-2.5-flash</span>
+            <span className="text-sm font-bold text-slate-800">gemini-3.8-flash</span>
           </div>
         </div>
       </div>

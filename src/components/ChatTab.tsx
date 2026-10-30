@@ -22,34 +22,34 @@ import {
 
 const QUICK_PROMPTS = [
   {
+    topic: 'umum',
+    label: "Contoh Kalimat Fi'il Madhi",
+    prompt: "Berikan 3 contoh kalimat bahasa Arab yang menggunakan Fi'il Madhi beserta harakat dan terjemahannya!",
+  },
+  {
     topic: 'irab',
     label: "I'rab: جَاءَ زَيْدٌ عَالِمًا",
-    prompt: "Tolong i'rab secara lengkap kalimat ini kata demi kata: جَاءَ زَيْدٌ عَالِمًا (sebutkan kedudukan, status i'rab, dan tandanya)",
+    prompt: "Tolong i'rab secara lengkap kalimat ini kata demi kata: جَاءَ زَيْدٌ عَالِمًا",
   },
   {
     topic: 'nahwu',
     label: "Fa'il vs Na'ibul Fa'il",
-    prompt: "Jelaskan perbedaan mendasar antara Fa'il dan Na'ibul Fa'il, serta bagaimana cara merubah fi'il ma'lum menjadi fi'il majhul?",
+    prompt: "Apa perbedaan mendasar antara Fa'il dan Na'ibul Fa'il? Berikan contoh perbandingannya.",
+  },
+  {
+    topic: 'nahwu',
+    label: "Pengertian Isim & Cirinya",
+    prompt: "Apa pengertian Isim dalam bahasa Arab dan sebutkan ciri-ciri tanda pengenalnya?",
   },
   {
     topic: 'shorof',
     label: "Tashrif Bab 1 (فَعَلَ - يَفْعُلُ)",
-    prompt: "Tuliskan tabel lengkap tashrif istilahi untuk wazan bab 1 Tsulatsi Mujarrad (فَعَلَ - يَفْعُلُ) dengan contoh fi'il نَصَرَ!",
-  },
-  {
-    topic: 'irab',
-    label: "I'rab: إِنَّمَا يَخْشَى اللَّهَ",
-    prompt: "Bagaimana analisis tarkib dan i'rab pada ayat: 'إِنَّمَا يَخْشَى اللَّهَ مِنْ عِبَادِهِ الْعُلَمَاءُ'? Mengapa lafadz Allah dibaca manshub (fathah)?",
+    prompt: "Tuliskan bentuk tashrif istilahi untuk wazan bab 1 (فَعَلَ - يَفْعُلُ) pada fi'il نَصَرَ!",
   },
   {
     topic: 'kaidah',
     label: "Kaidah I'lal Kata 'قَالَ'",
-    prompt: "Bagaimana proses kaidah i'lal pada kata قَالَ dan بَاعَ? Sebutkan bentuk asalnya dan syarat perubahannya.",
-  },
-  {
-    topic: 'nahwu',
-    label: "Isim Kaana & Khabar Inna",
-    prompt: "Apa perbedaan I'rab antara amil Kaana (كَانَ) dan saudaranya dengan Inna (إِنَّ) dan saudaranya?",
+    prompt: "Bagaimana proses kaidah i'lal pada kata قَالَ? Mengapa huruf wawu berubah menjadi alif?",
   },
 ];
 
@@ -86,7 +86,7 @@ export const ChatTab: React.FC = () => {
           id: 'welcome',
           userId: userProfile?.uid || 'guest',
           role: 'assistant',
-          content: `**Assalamu'alaikum wa rahmatullahi wa barakatuh.**\n\nAhlan wa Sahlan di **Ustadz NahwuLab**! Saya siap membantu Anda mendalami:\n- 🔍 **I'rab & Tarkib Kalimat**: Membedah kedudukan fa'il, maf'ul, mubtada', khabar, hal, tamyiz, dll.\n- ⚖️ **Ilmu Shorof & Morfologi**: Wazan, sighah, bina', dan kaidah i'lal kata.\n- 📖 **Kaidah Matan Kitab**: Al-Jurumiyyah, Amtsilah Tashrifiyyah, Imrithi, dan Alfiyyah.\n\n*Silakan ketik pertanyaan Anda atau pilih pintasan kaidah di bawah ini!*`,
+          content: `**Assalamu'alaikum wa rahmatullahi wa barakatuh.**\n\nAhlan wa Sahlan di **Ustadz NahwuLab**! Saya adalah asisten cerdas pembelajaran bahasa Arab, siap menjawab langsung sesuai bentuk instruksi yang Anda butuhkan:\n\n- 📝 **Contoh Kalimat/Kata**: Minta contoh kalimat atau kata berharakat beserta terjemahannya.\n- 💡 **Definisi & Ciri-Ciri**: Pengertian istilah nahwu, sharaf, fungsi, atau macam-macam pembagiannya.\n- ⚖️ **Perbedaan Konsep**: Membandingkan dua istilah (misal: Fa'il vs Na'ibul Fa'il, Isim vs Fi'il).\n- 🔍 **Analisis I'rab & Tarkib**: Kirimkan kalimat bahasa Arab untuk diuraikan kedudukan dan harakat akhirnya.\n- 📚 **Rangkuman Sederhana**: Minta penjelasan kaidah dengan bahasa yang mudah dipahami santri/pemula.\n\n*Silakan ketik pertanyaan Anda secara bebas atau klik salah satu kartu pintasan di samping!*`,
           timestamp: new Date().toISOString(),
         },
       ]);
