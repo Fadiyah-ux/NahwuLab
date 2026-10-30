@@ -1,65 +1,53 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { askNahwuAi, analyzeArabicSentence } from '../services/api';
 import { ChatMessageItem, SentenceAnalysisResult } from '../types';
 import { db } from '../firebase/config';
 import { collection, query, orderBy, limit, getDocs, addDoc } from 'firebase/firestore';
 import {
+  getJakartaDateKey,
+  getJakartaDateLabel,
+  formatJakartaTime,
+} from '../utils/chatDate';
+import {
   Send,
   Bot,
   User,
   Copy,
   Check,
-  RotateCcw,
-  BookOpen,
-  HelpCircle,
   Layers,
-  ArrowRight,
   Info,
+  Clock,
+  Calendar,
+  MessageSquare,
+  MessageSquarePlus,
+  ArrowRight,
+  ArrowLeft,
 } from 'lucide-react';
 
-const QUICK_PROMPTS = [
-  {
-    topic: 'umum',
-    label: "Contoh Kalimat Fi'il Madhi",
-    prompt: "Berikan 3 contoh kalimat bahasa Arab yang menggunakan Fi'il Madhi beserta harakat dan terjemahannya!",
-  },
-  {
-    topic: 'irab',
-    label: "I'rab: جَاءَ زَيْدٌ عَالِمًا",
-    prompt: "Tolong i'rab secara lengkap kalimat ini kata demi kata: جَاءَ زَيْدٌ عَالِمًا",
-  },
-  {
-    topic: 'nahwu',
-    label: "Fa'il vs Na'ibul Fa'il",
-    prompt: "Apa perbedaan mendasar antara Fa'il dan Na'ibul Fa'il? Berikan contoh perbandingannya.",
-  },
-  {
-    topic: 'nahwu',
-    label: "Pengertian Isim & Cirinya",
-    prompt: "Apa pengertian Isim dalam bahasa Arab dan sebutkan ciri-ciri tanda pengenalnya?",
-  },
-  {
-    topic: 'shorof',
-    label: "Tashrif Bab 1 (فَعَلَ - يَفْعُلُ)",
-    prompt: "Tuliskan bentuk tashrif istilahi untuk wazan bab 1 (فَعَلَ - يَفْعُلُ) pada fi'il نَصَرَ!",
-  },
-  {
-    topic: 'kaidah',
-    label: "Kaidah I'lal Kata 'قَالَ'",
-    prompt: "Bagaimana proses kaidah i'lal pada kata قَالَ? Mengapa huruf wawu berubah menjadi alif?",
-  },
-];
+const WELCOME_CONTENT = `Assalamu'alaikum!🙏🏻
+
+أهلاً وسهلاً!
+
+Mau berbincang soal Nahwu, Sharaf, atau bahasa Arab? Tanyakan apa saja, Musyrif siap menemani belajarmu! 📚`;
 
 const STORAGE_KEY_SENTENCE = 'nahwulab_tarkib_input';
 const STORAGE_KEY_ANALYZED_SENTENCE = 'nahwulab_tarkib_analyzed_sentence';
 const STORAGE_KEY_RESULT = 'nahwulab_tarkib_result';
 const STORAGE_KEY_SUBMODE = 'nahwulab_chat_submode';
 
+interface ChatSessionGroup {
+  dateKey: string;
+  label: string;
+  messages: ChatMessageItem[];
+  firstQuery: string;
+  lastTime: string;
+}
+
 export const ChatTab: React.FC = () => {
   const { userProfile, recordActivity } = useAuth();
-  
-  // Persisted mode across tab switches
+
+  // Submode: 'chat' | 'breakdown'
   const [mode, setMode] = useState<'chat' | 'breakdown'>(() => {
     try {
       const saved = sessionStorage.getItem(STORAGE_KEY_SUBMODE);
@@ -67,9 +55,12 @@ export const ChatTab: React.FC = () => {
     } catch {}
     return 'chat';
   });
-  
-  // Chat state
-  const [messages, setMessages] = useState<ChatMessageItem[]>([]);
+
+  // Persistent all messages for the current user
+  const [allMessages, setAllMessages] = useState<ChatMessageItem[]>([]);
+  // selectedDateKey: null means today's active conversation
+  const [selectedDateKey, setSelectedDateKey] = useState<string | null>(null);
+
   const [inputMessage, setInputMessage] = useState('');
   const [selectedTopic, setSelectedTopic] = useState<'nahwu' | 'shorof' | 'irab' | 'umum'>('umum');
   const [isLoading, setIsLoading] = useState(false);
@@ -99,54 +90,168 @@ export const ChatTab: React.FC = () => {
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
 
-  // Initial welcome message
+  const todayKey = getJakartaDateKey();
+
+  // Load chat messages from localStorage cache, then sync from Firestore
   useEffect(() => {
-    if (messages.length === 0) {
-      setMessages([
+    if (!userProfile?.uid) return;
+
+    const cacheKey = `nahwulab_chats_${userProfile.uid}`;
+    try {
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed)) {
+          setAllMessages(parsed);
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to read local chat cache:', e);
+    }
+
+    const fetchFirestoreChats = async () => {
+      try {
+        const chatsCol = collection(db, 'users', userProfile.uid, 'chats');
+        const q = query(chatsCol, orderBy('timestamp', 'asc'), limit(500));
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+          const cloudMsgs: ChatMessageItem[] = snap.docs.map((d) => {
+            const data = d.data();
+            return {
+              id: data.id || d.id,
+              userId: data.userId || userProfile.uid,
+              role: data.role as 'user' | 'assistant',
+              content: data.content,
+              topic: data.topic || 'umum',
+              timestamp: data.timestamp || new Date().toISOString(),
+            };
+          });
+
+          setAllMessages((prev) => {
+            const existingIds = new Set(cloudMsgs.map((m) => m.id));
+            const localOnly = prev.filter((m) => !existingIds.has(m.id));
+            const merged = [...cloudMsgs, ...localOnly].sort(
+              (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+            );
+            try {
+              localStorage.setItem(cacheKey, JSON.stringify(merged));
+            } catch {}
+            return merged;
+          });
+        }
+      } catch (err) {
+        console.warn('Firestore fetch chats error (using local cache):', err);
+      }
+    };
+
+    fetchFirestoreChats();
+  }, [userProfile?.uid]);
+
+  // Group messages into date sessions based on Asia/Jakarta calendar day
+  const chatSessions = useMemo(() => {
+    const groups = new Map<string, ChatMessageItem[]>();
+
+    allMessages.forEach((msg) => {
+      const dKey = getJakartaDateKey(msg.timestamp);
+      if (!groups.has(dKey)) {
+        groups.set(dKey, []);
+      }
+      groups.get(dKey)!.push(msg);
+    });
+
+    const sortedKeys = Array.from(groups.keys()).sort((a, b) => b.localeCompare(a));
+
+    return sortedKeys.map((dKey) => {
+      const msgs = groups.get(dKey)!;
+      const firstUserMsg = msgs.find((m) => m.role === 'user' || (m as any).sender === 'user');
+      const rawQuery = firstUserMsg
+        ? (firstUserMsg.content || (firstUserMsg as any).text)
+        : (msgs[0]?.content || (msgs[0] as any)?.text || 'Percakapan Bahasa Arab');
+      const firstQuery = rawQuery || 'Percakapan Bahasa Arab';
+      const lastTime = msgs[msgs.length - 1]?.timestamp || '';
+
+      return {
+        dateKey: dKey,
+        label: getJakartaDateLabel(dKey),
+        messages: msgs,
+        firstQuery,
+        lastTime,
+      } as ChatSessionGroup;
+    });
+  }, [allMessages]);
+
+  const isViewingHistory = selectedDateKey !== null && selectedDateKey !== todayKey;
+
+  // Messages to display in the main chat room
+  const displayedMessages: ChatMessageItem[] = useMemo(() => {
+    if (isViewingHistory && selectedDateKey) {
+      return allMessages.filter((m) => getJakartaDateKey(m.timestamp) === selectedDateKey);
+    }
+
+    // Active room for today
+    const todayMsgs = allMessages.filter((m) => getJakartaDateKey(m.timestamp) === todayKey);
+    if (todayMsgs.length === 0) {
+      // Show welcoming greeting when user has not started conversation today
+      return [
         {
-          id: 'welcome',
-          userId: userProfile?.uid || 'guest',
+          id: 'welcome_today',
+          userId: 'assistant',
           role: 'assistant',
-          content: `**Assalamu'alaikum wa rahmatullahi wa barakatuh.**\n\nAhlan wa Sahlan di **Tanya Musyrif NahwuLab**! Saya adalah asisten pembelajaran bahasa Arab, siap menjawab langsung sesuai bentuk instruksi yang Anda butuhkan:\n\n- 📝 **Contoh Kalimat/Kata**: Minta contoh kalimat atau kata berharakat beserta terjemahannya.\n- 💡 **Definisi & Ciri-Ciri**: Pengertian istilah nahwu, sharaf, fungsi, atau macam-macam pembagiannya.\n- ⚖️ **Perbedaan Konsep**: Membandingkan dua istilah (misal: Fa'il vs Na'ibul Fa'il, Isim vs Fi'il).\n- 🔍 **Analisis I'rab & Tarkib**: Kirimkan kalimat bahasa Arab untuk diuraikan kedudukan dan harakat akhirnya.\n- 📚 **Rangkuman Sederhana**: Minta penjelasan kaidah dengan bahasa yang mudah dipahami santri/pemula.\n\n*Silakan ketik pertanyaan Anda secara bebas atau klik salah satu kartu pintasan di samping!*`,
+          content: WELCOME_CONTENT,
           timestamp: new Date().toISOString(),
         },
-      ]);
+      ];
     }
-  }, [userProfile]);
+    return todayMsgs;
+  }, [allMessages, selectedDateKey, todayKey, isViewingHistory]);
 
   useEffect(() => {
-    if (messages.length > 1) {
+    if (displayedMessages.length > 1 || isLoading) {
       chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messages.length, isLoading]);
+  }, [displayedMessages.length, isLoading]);
 
   const handleSendMessage = async (customPrompt?: string) => {
     const textToSend = customPrompt || inputMessage;
     if (!textToSend.trim() || isLoading) return;
 
+    // If user was viewing past history, switch back to today's active conversation
+    if (isViewingHistory) {
+      setSelectedDateKey(null);
+    }
+
     const userMsg: ChatMessageItem = {
       id: 'usr_' + Date.now(),
       userId: userProfile?.uid || 'guest',
       role: 'user',
-      content: textToSend,
+      content: textToSend.trim(),
       topic: selectedTopic,
       timestamp: new Date().toISOString(),
     };
 
-    setMessages((prev) => [...prev, userMsg]);
+    const updatedWithUser = [...allMessages, userMsg];
+    setAllMessages(updatedWithUser);
     if (!customPrompt) setInputMessage('');
     setIsLoading(true);
 
+    if (userProfile?.uid) {
+      try {
+        localStorage.setItem(`nahwulab_chats_${userProfile.uid}`, JSON.stringify(updatedWithUser));
+      } catch {}
+    }
+
     try {
-      // Record activity to reward streak points
       recordActivity('chat');
 
-      const historyPayload = messages.map((m) => ({
-        role: m.role,
-        content: m.content,
-      }));
+      // Filter today's messages for context history
+      const todayContext = updatedWithUser
+        .filter((m) => getJakartaDateKey(m.timestamp) === todayKey)
+        .map((m) => ({
+          role: m.role,
+          content: m.content,
+        }));
 
-      const replyText = await askNahwuAi(textToSend, historyPayload, selectedTopic);
+      const replyText = await askNahwuAi(textToSend, todayContext, selectedTopic);
 
       const aiMsg: ChatMessageItem = {
         id: 'ai_' + Date.now(),
@@ -157,30 +262,46 @@ export const ChatTab: React.FC = () => {
         timestamp: new Date().toISOString(),
       };
 
-      setMessages((prev) => [...prev, aiMsg]);
+      const finalUpdated = [...updatedWithUser, aiMsg];
+      setAllMessages(finalUpdated);
 
-      // Save to Firestore subcollection if user authenticated
-      if (userProfile?.uid && !userProfile.uid.startsWith('admin_')) {
+      if (userProfile?.uid) {
+        try {
+          localStorage.setItem(`nahwulab_chats_${userProfile.uid}`, JSON.stringify(finalUpdated));
+        } catch {}
+
         try {
           const chatsCol = collection(db, 'users', userProfile.uid, 'chats');
-          await addDoc(chatsCol, userMsg);
-          await addDoc(chatsCol, aiMsg);
+          await addDoc(chatsCol, {
+            id: userMsg.id,
+            userId: userProfile.uid,
+            role: userMsg.role,
+            content: userMsg.content,
+            topic: userMsg.topic || 'umum',
+            timestamp: userMsg.timestamp,
+          });
+          await addDoc(chatsCol, {
+            id: aiMsg.id,
+            userId: userProfile.uid,
+            role: aiMsg.role,
+            content: aiMsg.content,
+            topic: aiMsg.topic || 'umum',
+            timestamp: aiMsg.timestamp,
+          });
         } catch (e) {
           console.warn('Could not persist chat in firestore:', e);
         }
       }
     } catch (err: any) {
       console.error('Chat error:', err);
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: 'err_' + Date.now(),
-          userId: userProfile?.uid || 'guest',
-          role: 'assistant',
-          content: 'Maaf, terjadi kendala saat menghubungkan dengan AI Nahwu. Silakan periksa koneksi dan coba beberapa saat lagi.',
-          timestamp: new Date().toISOString(),
-        },
-      ]);
+      const errorMsg: ChatMessageItem = {
+        id: 'err_' + Date.now(),
+        userId: userProfile?.uid || 'guest',
+        role: 'assistant',
+        content: 'Maaf, terjadi kendala saat menghubungkan dengan AI Nahwu. Silakan periksa koneksi dan coba beberapa saat lagi.',
+        timestamp: new Date().toISOString(),
+      };
+      setAllMessages((prev) => [...prev, errorMsg]);
     } finally {
       setIsLoading(false);
     }
@@ -215,7 +336,6 @@ export const ChatTab: React.FC = () => {
 
     try {
       const res = await analyzeArabicSentence(target);
-      // Strictly replace result only upon successful response
       setAnalysisResult(res);
       setAnalyzedSentence(target);
       try {
@@ -225,7 +345,6 @@ export const ChatTab: React.FC = () => {
       } catch {}
     } catch (err: any) {
       console.error('Analysis failed:', err);
-      // Retain previous analysisResult without deleting it!
       setAnalysisError(
         err?.message || 'Gagal membedah kalimat baru. Hasil analisis sebelumnya tetap dipertahankan.'
       );
@@ -283,7 +402,6 @@ export const ChatTab: React.FC = () => {
       {mode === 'chat' ? (
         /* CHAT VIEW */
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          
           {/* Main Chat Box */}
           <div className="lg:col-span-8 bg-white rounded-3xl border border-slate-200 shadow-sm flex flex-col h-[700px] overflow-hidden">
             {/* Chat Header */}
@@ -317,10 +435,34 @@ export const ChatTab: React.FC = () => {
               </div>
             </div>
 
+            {/* Viewing History Top Alert Banner */}
+            {isViewingHistory && selectedDateKey && (
+              <div className="px-5 py-3 bg-gradient-to-r from-emerald-50 via-teal-50 to-slate-50 border-b border-emerald-100 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Clock className="w-4 h-4 text-emerald-700 shrink-0" />
+                  <span className="text-xs text-slate-700 truncate">
+                    Melihat Riwayat Percakapan:{' '}
+                    <strong className="font-bold text-emerald-800">
+                      {getJakartaDateLabel(selectedDateKey)}
+                    </strong>
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedDateKey(null)}
+                  className="text-xs font-bold text-emerald-700 hover:text-emerald-800 bg-white hover:bg-emerald-100/60 border border-emerald-200 px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 shadow-xs cursor-pointer shrink-0"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>Kembali ke Chat Hari Ini</span>
+                </button>
+              </div>
+            )}
+
             {/* Messages Scroll Area */}
             <div className="flex-1 p-4 sm:p-6 overflow-y-auto space-y-5 bg-slate-50/50">
-              {messages.map((msg) => {
-                const isAi = msg.role === 'assistant';
+              {displayedMessages.map((msg) => {
+                const isAi = msg.role === 'assistant' || (msg as any).sender === 'ai' || (msg as any).role === 'model';
+                const messageText = msg.content || (msg as any).text || '';
                 return (
                   <div
                     key={msg.id}
@@ -342,7 +484,7 @@ export const ChatTab: React.FC = () => {
                       {/* Copy Button for AI */}
                       {isAi && (
                         <button
-                          onClick={() => copyToClipboard(msg.content, msg.id)}
+                          onClick={() => copyToClipboard(messageText, msg.id)}
                           className="absolute top-3 right-3 p-1.5 rounded-lg text-slate-400 hover:text-emerald-600 hover:bg-slate-100 transition-colors"
                           title="Salin jawaban"
                         >
@@ -356,7 +498,7 @@ export const ChatTab: React.FC = () => {
 
                       {/* Content with Arabic Styling */}
                       <div className="prose prose-sm max-w-none prose-emerald whitespace-pre-wrap leading-relaxed font-sans">
-                        {msg.content.split('\n').map((line, lIdx) => {
+                        {(messageText as string).split('\n').map((line: string, lIdx: number) => {
                           const isArabicLine = /[\u0600-\u06FF]/.test(line);
                           return (
                             <p
@@ -392,18 +534,16 @@ export const ChatTab: React.FC = () => {
                 );
               })}
 
+              {/* Simplified generic loading indicator without specific grammar text */}
               {isLoading && (
                 <div className="flex gap-3 justify-start">
-                  <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-800 text-white flex items-center justify-center shrink-0 animate-pulse">
+                  <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-800 text-white flex items-center justify-center shrink-0">
                     <Bot className="w-4 h-4" />
                   </div>
-                  <div className="bg-white border border-emerald-100 rounded-2xl p-4 shadow-xs flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-emerald-600 animate-bounce"></span>
-                    <span className="w-2 h-2 rounded-full bg-emerald-600 animate-bounce [animation-delay:0.2s]"></span>
-                    <span className="w-2 h-2 rounded-full bg-emerald-600 animate-bounce [animation-delay:0.4s]"></span>
-                    <span className="text-xs text-slate-500 font-medium ml-1">
-                      Musyrif NahwuLab sedang menelaah kaidah gramatika...
-                    </span>
+                  <div className="bg-white border border-emerald-100 rounded-2xl px-5 py-4 shadow-xs flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 animate-bounce"></span>
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 animate-bounce [animation-delay:0.2s]"></span>
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 animate-bounce [animation-delay:0.4s]"></span>
                   </div>
                 </div>
               )}
@@ -411,77 +551,148 @@ export const ChatTab: React.FC = () => {
               <div ref={chatEndRef} />
             </div>
 
-            {/* Input Box Form */}
+            {/* Input Box Form / History Footer */}
             <div className="p-4 bg-white border-t border-slate-200">
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  handleSendMessage();
-                }}
-                className="flex items-center gap-2"
-              >
-                <input
-                  type="text"
-                  value={inputMessage}
-                  onChange={(e) => setInputMessage(e.target.value)}
-                  placeholder="Tanyakan persoalan Nahwu, Shorof, atau ketik kalimat Arab..."
-                  className="flex-1 px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-hidden focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all"
-                  disabled={isLoading}
-                />
-                <button
-                  type="submit"
-                  disabled={!inputMessage.trim() || isLoading}
-                  className="px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-md shadow-emerald-700/20 transition-all flex items-center gap-2 disabled:opacity-50 active:scale-95"
+              {isViewingHistory ? (
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3.5 bg-slate-50 rounded-2xl border border-slate-200">
+                  <span className="text-xs text-slate-600 text-center sm:text-left">
+                    Anda sedang melihat riwayat percakapan lampau (
+                    <strong>{getJakartaDateLabel(selectedDateKey)}</strong>).
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedDateKey(null)}
+                    className="w-full sm:w-auto px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
+                  >
+                    <MessageSquarePlus className="w-4 h-4" />
+                    <span>Kembali ke Chat Hari Ini untuk Bertanya</span>
+                  </button>
+                </div>
+              ) : (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSendMessage();
+                  }}
+                  className="flex items-center gap-2"
                 >
-                  <span>Kirim</span>
-                  <Send className="w-4 h-4" />
-                </button>
-              </form>
+                  <input
+                    type="text"
+                    value={inputMessage}
+                    onChange={(e) => setInputMessage(e.target.value)}
+                    placeholder="Tanyakan persoalan Nahwu, Shorof, atau ketik kalimat Arab..."
+                    className="flex-1 px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-hidden focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all"
+                    disabled={isLoading}
+                  />
+                  <button
+                    type="submit"
+                    disabled={!inputMessage.trim() || isLoading}
+                    className="px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-md shadow-emerald-700/20 transition-all flex items-center gap-2 disabled:opacity-50 active:scale-95 cursor-pointer"
+                  >
+                    <span>Kirim</span>
+                    <Send className="w-4 h-4" />
+                  </button>
+                </form>
+              )}
             </div>
           </div>
 
-          {/* Right Column: Quick Prompt Cards & Study Guides */}
+          {/* Right Column: Riwayat Chat Panel & Info Guide */}
           <div className="lg:col-span-4 space-y-5">
-            {/* Quick Prompt Chips */}
+            {/* Riwayat Chat Panel */}
             <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm">
-              <div className="flex items-center gap-2 text-slate-800 font-bold text-sm mb-3">
-                <HelpCircle className="w-4 h-4 text-emerald-600" />
-                <span>Pintasan Tanya Kaidah Populer</span>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2 text-slate-800 font-bold text-sm">
+                  <Clock className="w-4 h-4 text-emerald-600" />
+                  <span>Riwayat Chat</span>
+                </div>
+                {selectedDateKey && (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedDateKey(null)}
+                    className="text-[11px] font-bold text-emerald-700 hover:text-emerald-800 flex items-center gap-1 cursor-pointer bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-200 transition-colors"
+                  >
+                    <MessageSquarePlus className="w-3 h-3" />
+                    <span>Chat Hari Ini</span>
+                  </button>
+                )}
               </div>
               <p className="text-xs text-slate-500 mb-4">
-                Klik kartu di bawah untuk menanyakan kaidah atau meminta analisis I'rab seketika:
+                Daftar arsip percakapan harian Anda bersama Musyrif NahwuLab:
               </p>
 
-              <div className="space-y-2">
-                {QUICK_PROMPTS.map((qp, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => handleSendMessage(qp.prompt)}
-                    disabled={isLoading}
-                    className="w-full text-left p-3 rounded-2xl bg-slate-50 hover:bg-emerald-50/70 border border-slate-200 hover:border-emerald-200 transition-all group cursor-pointer"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-slate-800 group-hover:text-emerald-700">
-                        {qp.label}
-                      </span>
-                      <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-emerald-600 transition-transform group-hover:translate-x-0.5" />
-                    </div>
-                  </button>
-                ))}
-              </div>
+              {chatSessions.length === 0 ? (
+                <div className="text-center py-8 px-4 rounded-2xl bg-slate-50 border border-dashed border-slate-200">
+                  <MessageSquare className="w-7 h-7 text-slate-300 mx-auto mb-2" />
+                  <p className="text-xs font-bold text-slate-600">Belum Ada Riwayat Chat</p>
+                  <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                    Pertanyaan yang Anda ajukan kepada Musyrif akan otomatis diarsipkan di sini per hari.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2.5 max-h-[500px] overflow-y-auto pr-1">
+                  {chatSessions.map((session) => {
+                    const isCurrentToday = session.dateKey === todayKey;
+                    const isSelected = selectedDateKey
+                      ? selectedDateKey === session.dateKey
+                      : isCurrentToday;
+
+                    return (
+                      <button
+                        key={session.dateKey}
+                        type="button"
+                        onClick={() => setSelectedDateKey(session.dateKey)}
+                        className={`w-full text-left p-3.5 rounded-2xl border transition-all cursor-pointer group ${
+                          isSelected
+                            ? 'bg-emerald-50/90 border-emerald-300 shadow-xs ring-1 ring-emerald-400/40'
+                            : 'bg-slate-50 hover:bg-slate-100/80 border-slate-200'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-1.5">
+                          <div className="flex items-center gap-1.5">
+                            <Calendar className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                            <span className="text-xs font-bold text-slate-900">
+                              {session.label}
+                            </span>
+                            {isCurrentToday && (
+                              <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-emerald-200/70 text-emerald-800">
+                                Aktif
+                              </span>
+                            )}
+                          </div>
+                          {session.lastTime && (
+                            <span className="text-[10px] text-slate-400 font-medium">
+                              {formatJakartaTime(session.lastTime)}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
+                          {session.firstQuery}
+                        </p>
+                        <div className="mt-2.5 flex items-center justify-between text-[11px] text-slate-400 pt-2 border-t border-slate-200/60">
+                          <span>{session.messages.length} pesan</span>
+                          <span className="text-emerald-700 font-semibold group-hover:translate-x-0.5 transition-transform flex items-center gap-1">
+                            <span>{isSelected ? 'Sedang Dibuka' : 'Buka'}</span>
+                            <ArrowRight className="w-3 h-3" />
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             {/* Guide Card */}
             <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-3xl p-5 border border-emerald-200/80">
               <div className="flex items-center gap-2 text-emerald-900 font-bold text-sm mb-2">
                 <Info className="w-4 h-4 text-emerald-700" />
-                <span>Tips Konsultasi Berfaedah</span>
+                <span>Karakteristik Percakapan Harian</span>
               </div>
               <ul className="text-xs text-emerald-800/90 space-y-2 list-disc pl-4 leading-relaxed">
-                <li>Sertakan harakat lengkap pada kalimat Arab untuk mendapatkan analisis I'rab paling akurat.</li>
-                <li>Tanyakan asal usul kata untuk mengupas wazan dan kaidah i'lal shorofnya.</li>
-                <li>Gunakan tab <strong>Bedah Kalimat</strong> untuk melihat visual kata demi kata dalam tabel rapi.</li>
+                <li>Percakapan hari ini tersimpan otomatis dan dapat dilanjutkan sewaktu-waktu.</li>
+                <li>Saat berganti hari (WIB), room chat utama otomatis siap untuk sesi baru dan riwayat hari sebelumnya tersimpan rapi di atas.</li>
+                <li>Klik salah satu sesi di panel <strong>Riwayat Chat</strong> untuk membaca kembali penjelasan Musyrif tanpa memicu AI ulang.</li>
               </ul>
             </div>
           </div>

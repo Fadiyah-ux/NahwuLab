@@ -112,14 +112,27 @@ app.post('/api/chat', async (req: Request, res: Response) => {
       parts: [{ text: userPromptWithContext }]
     });
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-3.8-flash',
-      contents,
-      config: {
-        systemInstruction: NAHWU_SYSTEM_INSTRUCTION,
-        temperature: 0.35,
-      }
-    });
+    let response;
+    try {
+      response = await ai.models.generateContent({
+        model: 'gemini-3-flash-preview',
+        contents,
+        config: {
+          systemInstruction: NAHWU_SYSTEM_INSTRUCTION,
+          temperature: 0.35,
+        }
+      });
+    } catch (modelErr) {
+      console.warn('gemini-3-flash-preview in chat fallback to gemini-3.8-flash:', modelErr);
+      response = await ai.models.generateContent({
+        model: 'gemini-3.8-flash',
+        contents,
+        config: {
+          systemInstruction: NAHWU_SYSTEM_INSTRUCTION,
+          temperature: 0.35,
+        }
+      });
+    }
 
     res.json({
       reply: response.text || 'Maaf, belum dapat menghasilkan respon. Silakan coba kembali.'
