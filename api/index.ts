@@ -136,60 +136,105 @@ app.post('/api/chat', async (req: Request, res: Response) => {
 app.post('/api/analyze-sentence', async (req: Request, res: Response) => {
   try {
     const { sentence } = req.body;
-    if (!sentence) {
+    if (!sentence || typeof sentence !== 'string' || !sentence.trim()) {
       res.status(400).json({ error: 'Kalimat bahasa Arab harus diisi' });
       return;
     }
 
+    const cleanSentence = sentence.trim();
     const apiKey = getApiKey();
     if (!apiKey) {
-      res.json(generateLocalAnalysisPayload(sentence));
+      res.json(generateLocalAnalysisPayload(cleanSentence));
       return;
     }
 
     const ai = new GoogleGenAI({ apiKey });
-    const prompt = `Analisis kalimat bahasa Arab berikut kata demi kata untuk susunan gramatikal (Tarkib & I'rab) dan morfologi (Shorof).
-Kalimat: "${sentence}"
+    const prompt = `Analisis kalimat bahasa Arab berikut kata demi kata secara mendalam untuk susunan gramatikal sintaksis (Tarkib & I'rab) dan morfologi (Shorof).
+Kalimat yang WAJIB dianalisis adalah persis seperti yang diberikan berikut:
+"${cleanSentence}"
 
-Balas HANYA dalam format JSON valid (tanpa bungkus markdown) dengan struktur:
+PANDUAN & ATURAN ANALISIS KETAT:
+1. Analisis HANYA kalimat di atas. JANGAN PERNAH mengganti, mengubah, menukar, atau mengabaikan kalimat tersebut dengan kalimat contoh bawaan atau kalimat lain apapun.
+2. Uraikan kalimat di atas menjadi kata-kata penyusun aslinya secara berurutan. Setiap elemen dalam array "words" harus bersumber dari kata asli pada kalimat tersebut.
+3. Berikan arti kalimat yang tepat dan alami dalam bahasa Indonesia pada key "translation".
+4. Tentukan jenis susunan kalimat secara umum dalam bahasa Indonesia (misal: "Jumlah Fi'liyyah (terdiri dari fi'il dan fa'il)", "Jumlah Ismiyyah (terdiri dari mubtada' dan khabar)", "Syibhul Jumlah", dll) pada key "overallGrammar".
+5. Untuk setiap kata dalam array "words", sertakan:
+   - "word": kata berharakat lengkap (tambahkan harakat bila input belum berharakat tanpa mengubah huruf aslinya)
+   - "type": jenis kata dalam kaidah nahwu ("Isim", "Fi'il Madhi", "Fi'il Mudhari'", "Fi'il Amr", atau "Harf")
+   - "position": kedudukan tarkib spesifik (misal: "Fa'il (Pelaku)", "Maf'ul Bih (Objek)", "Mubtada' (Subjek)", "Khabar (Predikat)", "Mudhaf Ilaih", "Majrur bi Harfil Jar", "Na'at / Shifat", dll)
+   - "irabCase": status i'rab ("Marfu'", "Manshub", "Majrur", "Majzum", atau "Mabni")
+   - "marker": tanda I'rab dan harakatnya ("Dhommah Zhahirah", "Fathah Zhahirah", "Kasrah Zhahirah", "Sukun", "Wawu (Jamak Mudzakkar Salim)", "Alif (Isim Tatsniyah)", "Hadzfun Nun", "Mabni 'alal Fath", dll)
+   - "morphology": wazan dan sighah shorof (misal: "Wazan فَعَلَ (Fi'il Tsulatsi Mujarrad)", "Isim Fa'il dari فَعَلَ", "Isim Jamak Taksir", atau "-" jika Harf)
+   - "explanation": penjelasan kaidah nahwu/shorof secara ringkas mengapa kata tersebut memiliki kedudukan dan i'rab demikian
+6. Jika kalimat pengguna mengandung kesalahan tata bahasa (misal harakat salah atau struktur tidak sesuai kaidah), tetap bedah kata-kata pada kalimat asli tersebut dan jelaskan letak kesalahan tata bahasanya pada "explanation" atau "overallGrammar".
+7. Jika input terlalu ambigu atau bukan kalimat bahasa Arab yang bermakna, jelaskan secara sopan pada "overallGrammar" dan "translation" tanpa mengarang analisis palsu atau menggantinya dengan kalimat lain.
+
+Balas HANYA dalam format JSON valid (tanpa bungkus markdown atau teks pembuka/penutup lainnya) dengan struktur:
 {
-  "sentence": "${sentence}",
+  "sentence": "${cleanSentence}",
   "translation": "Arti kalimat dalam bahasa Indonesia",
-  "overallGrammar": "Deskripsi struktur umum kalimat (misal: Jumlah Fi'liyyah atau Jumlah Ismiyyah)",
+  "overallGrammar": "Deskripsi struktur umum kalimat",
   "words": [
     {
       "word": "kata berharakat",
       "type": "Isim / Fi'il / Harf",
-      "position": "Kedudukan tarkib (misal: Mubtada', Khabar, Fa'il, Maf'ul bih, Mudhaf Ilaih, dll)",
+      "position": "Kedudukan tarkib",
       "irabCase": "Marfu' / Manshub / Majrur / Majzum / Mabni",
-      "marker": "Tanda I'rab (misal: Dhommah, Fathah, Kasrah, Sukun, Wawu, Ya', dll)",
-      "morphology": "Wazan & Sighah Shorof jika isim/fi'il (misal: Wazan فَاعِلٌ, Isim Fa'il dari فَعَلَ)",
-      "explanation": "Penjelasan ringkas kaidah nahwu/shorofnya"
+      "marker": "Tanda I'rab",
+      "morphology": "Wazan / Sighah",
+      "explanation": "Penjelasan kaidah"
     }
   ]
 }`;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-3.8-flash',
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      config: {
-        responseMimeType: 'application/json',
-        temperature: 0.2
-      }
-    });
+    let response;
+    try {
+      response = await ai.models.generateContent({
+        model: 'gemini-3-flash-preview',
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        config: {
+          responseMimeType: 'application/json',
+          temperature: 0.15
+        }
+      });
+    } catch (modelErr) {
+      console.warn('gemini-3-flash-preview fallback to gemini-3.8-flash:', modelErr);
+      response = await ai.models.generateContent({
+        model: 'gemini-3.8-flash',
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        config: {
+          responseMimeType: 'application/json',
+          temperature: 0.15
+        }
+      });
+    }
 
     const text = response.text || '{}';
     let data;
     try {
       data = JSON.parse(text);
     } catch {
-      data = generateLocalAnalysisPayload(sentence);
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        data = JSON.parse(jsonMatch[0]);
+      } else {
+        throw new Error('Respon AI tidak berupa JSON valid');
+      }
+    }
+
+    // Strict alignment: Ensure sentence matches the exact user sentence
+    data.sentence = cleanSentence;
+
+    if (!data.words || !Array.isArray(data.words) || data.words.length === 0) {
+      throw new Error('Hasil rincian kata tidak ditemukan');
     }
 
     res.json(data);
   } catch (error: any) {
     console.error('Analyze Sentence Error:', error);
-    res.json(generateLocalAnalysisPayload(req.body?.sentence || ''));
+    res.status(500).json({
+      error: error?.message || 'Gagal membedah kalimat Arab. Silakan periksa koneksi dan coba beberapa saat lagi.'
+    });
   }
 });
 
@@ -342,11 +387,12 @@ Dalam pembelajaran bahasa Arab, kaidah ini dapat ditinjau secara praktis:
 }
 
 function generateLocalAnalysisPayload(sentence: string) {
-  const words = (sentence || 'جَاءَ زَيْدٌ عَالِمًا').trim().split(/\s+/);
+  const clean = (sentence || '').trim();
+  const words = clean ? clean.split(/\s+/) : [];
   return {
-    sentence: sentence || 'جَاءَ زَيْدٌ عَالِمًا',
-    translation: 'Analisis gramatikal terstruktur untuk kalimat: ' + sentence,
-    overallGrammar: 'Jumlah Mufidah',
+    sentence: clean,
+    translation: 'Analisis gramatikal terstruktur untuk kalimat: ' + clean,
+    overallGrammar: words.length > 0 && (words[0].startsWith('يَ') || words[0].startsWith('تَ') || words[0].endsWith('َ')) ? 'Jumlah Fi\'liyyah' : 'Jumlah Ismiyyah',
     words: words.map((w, idx) => ({
       word: w,
       type: idx === 0 ? "Fi'il" : 'Isim',

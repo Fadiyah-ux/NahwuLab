@@ -25,26 +25,31 @@ export async function askNahwuAi(
 }
 
 export async function analyzeArabicSentence(sentence: string): Promise<SentenceAnalysisResult> {
-  try {
-    const res = await fetch('/api/analyze-sentence', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sentence }),
-    });
-
-    if (!res.ok) {
-      throw new Error(`Server returned status ${res.status}`);
-    }
-
-    const data = await res.json();
-    if (data.words && Array.isArray(data.words)) {
-      return data as SentenceAnalysisResult;
-    }
-    throw new Error('Invalid format received from server');
-  } catch (err: any) {
-    console.warn('Sentence analysis error, generating heuristic breakdown:', err);
-    return generateLocalSentenceAnalysis(sentence);
+  const clean = sentence.trim();
+  if (!clean) {
+    throw new Error('Kalimat bahasa Arab tidak boleh kosong');
   }
+
+  const res = await fetch('/api/analyze-sentence', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ sentence: clean }),
+  });
+
+  if (!res.ok) {
+    let errMsg = `Gagal menganalisis kalimat (Status: ${res.status})`;
+    try {
+      const errData = await res.json();
+      if (errData?.error) errMsg = errData.error;
+    } catch {}
+    throw new Error(errMsg);
+  }
+
+  const data = await res.json();
+  if (data && data.words && Array.isArray(data.words) && data.words.length > 0) {
+    return data as SentenceAnalysisResult;
+  }
+  throw new Error('Format hasil analisis yang diterima dari server tidak valid');
 }
 
 function generateLocalScholarlyResponse(query: string, _topic: string): string {

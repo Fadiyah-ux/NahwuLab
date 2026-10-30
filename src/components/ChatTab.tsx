@@ -51,17 +51,22 @@ const QUICK_PROMPTS = [
   },
 ];
 
-const SAMPLE_SENTENCES = [
-  'جَاءَ زَيْدٌ عَالِمًا',
-  'كَتَبَ التِّلْمِيذُ الدَّرْسَ فِي الْفَصْلِ',
-  'إِنَّ اللهَ مَعَ الصَّابِرِينَ',
-  'كَانَ الْمُعَلِّمُ نَاصِحًا لِلطُّلَّابِ',
-  'الْعِلْمُ نُورٌ يَهْدِي الْعُقُولَ',
-];
+const STORAGE_KEY_SENTENCE = 'nahwulab_tarkib_input';
+const STORAGE_KEY_ANALYZED_SENTENCE = 'nahwulab_tarkib_analyzed_sentence';
+const STORAGE_KEY_RESULT = 'nahwulab_tarkib_result';
+const STORAGE_KEY_SUBMODE = 'nahwulab_chat_submode';
 
 export const ChatTab: React.FC = () => {
   const { userProfile, recordActivity } = useAuth();
-  const [mode, setMode] = useState<'chat' | 'breakdown'>('chat');
+  
+  // Persisted mode across tab switches
+  const [mode, setMode] = useState<'chat' | 'breakdown'>(() => {
+    try {
+      const saved = sessionStorage.getItem(STORAGE_KEY_SUBMODE);
+      if (saved === 'chat' || saved === 'breakdown') return saved;
+    } catch {}
+    return 'chat';
+  });
   
   // Chat state
   const [messages, setMessages] = useState<ChatMessageItem[]>([]);
@@ -71,10 +76,28 @@ export const ChatTab: React.FC = () => {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  // Sentence breakdown state
-  const [customSentence, setCustomSentence] = useState('جَاءَ زَيْدٌ عَالِمًا');
+  // Sentence breakdown state with session persistence
+  const [customSentence, setCustomSentence] = useState<string>(() => {
+    try {
+      return sessionStorage.getItem(STORAGE_KEY_SENTENCE) || '';
+    } catch {}
+    return '';
+  });
+  const [analyzedSentence, setAnalyzedSentence] = useState<string>(() => {
+    try {
+      return sessionStorage.getItem(STORAGE_KEY_ANALYZED_SENTENCE) || '';
+    } catch {}
+    return '';
+  });
+  const [analysisResult, setAnalysisResult] = useState<SentenceAnalysisResult | null>(() => {
+    try {
+      const saved = sessionStorage.getItem(STORAGE_KEY_RESULT);
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return null;
+  });
   const [analyzing, setAnalyzing] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState<SentenceAnalysisResult | null>(null);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
 
   // Initial welcome message
   useEffect(() => {
@@ -163,18 +186,49 @@ export const ChatTab: React.FC = () => {
     }
   };
 
-  const handleRunAnalysis = async (sentenceToAnalyze?: string) => {
-    const target = sentenceToAnalyze || customSentence;
-    if (!target.trim() || analyzing) return;
+  const handleModeChange = (newMode: 'chat' | 'breakdown') => {
+    setMode(newMode);
+    try {
+      sessionStorage.setItem(STORAGE_KEY_SUBMODE, newMode);
+    } catch {}
+  };
+
+  const handleSentenceInputChange = (val: string) => {
+    setCustomSentence(val);
+    try {
+      sessionStorage.setItem(STORAGE_KEY_SENTENCE, val);
+    } catch {}
+    if (analysisError) setAnalysisError(null);
+  };
+
+  const handleRunAnalysis = async () => {
+    const target = customSentence.trim();
+    if (!target) {
+      setAnalysisError('Silakan masukkan kalimat bahasa Arab terlebih dahulu.');
+      return;
+    }
+    if (analyzing) return;
 
     setAnalyzing(true);
+    setAnalysisError(null);
     recordActivity('chat');
 
     try {
       const res = await analyzeArabicSentence(target);
+      // Strictly replace result only upon successful response
       setAnalysisResult(res);
-    } catch (err) {
+      setAnalyzedSentence(target);
+      try {
+        sessionStorage.setItem(STORAGE_KEY_RESULT, JSON.stringify(res));
+        sessionStorage.setItem(STORAGE_KEY_ANALYZED_SENTENCE, target);
+        sessionStorage.setItem(STORAGE_KEY_SENTENCE, target);
+      } catch {}
+    } catch (err: any) {
       console.error('Analysis failed:', err);
+      // Retain previous analysisResult without deleting it!
+      setAnalysisError(
+        err?.message || 'Gagal membedah kalimat baru. Hasil analisis sebelumnya tetap dipertahankan.'
+      );
     } finally {
       setAnalyzing(false);
     }
@@ -202,8 +256,8 @@ export const ChatTab: React.FC = () => {
         {/* Mode Toggle Buttons */}
         <div className="flex items-center bg-slate-800/80 p-1.5 rounded-2xl border border-emerald-500/30 shrink-0">
           <button
-            onClick={() => setMode('chat')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+            onClick={() => handleModeChange('chat')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
               mode === 'chat'
                 ? 'bg-emerald-600 text-white shadow-md'
                 : 'text-slate-300 hover:text-white'
@@ -213,11 +267,8 @@ export const ChatTab: React.FC = () => {
             <span>Tanya Musyrif NahwuLab</span>
           </button>
           <button
-            onClick={() => {
-              setMode('breakdown');
-              if (!analysisResult) handleRunAnalysis();
-            }}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+            onClick={() => handleModeChange('breakdown')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
               mode === 'breakdown'
                 ? 'bg-emerald-600 text-white shadow-md'
                 : 'text-slate-300 hover:text-white'
@@ -439,55 +490,101 @@ export const ChatTab: React.FC = () => {
         /* SENTENCE BREAKDOWN VIEW */
         <div className="space-y-6">
           {/* Sentence Input Box */}
-          <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
-            <h3 className="text-base font-bold text-slate-800 mb-2">
-              Masukkan Kalimat Bahasa Arab untuk Dibedah
-            </h3>
-            <p className="text-xs text-slate-500 mb-4">
-              Ketik kalimat dengan harakat atau pilih salah satu contoh kalimat gramatikal di bawah:
-            </p>
-
-            {/* Quick Sample Sentences */}
-            <div className="flex flex-wrap gap-2 mb-4">
-              {SAMPLE_SENTENCES.map((samp, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => {
-                    setCustomSentence(samp);
-                    handleRunAnalysis(samp);
-                  }}
-                  className="px-3 py-1.5 rounded-full text-xs font-serif font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 transition-colors"
-                >
-                  {samp}
-                </button>
-              ))}
+          <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200 shadow-sm">
+            <div className="flex items-center gap-2.5 mb-2">
+              <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
+                <Layers className="w-4 h-4 text-emerald-700" />
+              </div>
+              <h3 className="text-base sm:text-lg font-bold text-slate-800">
+                Masukkan Kalimat Bahasa Arab untuk Dibedah
+              </h3>
             </div>
+            <p className="text-xs sm:text-sm text-slate-600 mb-5 leading-relaxed">
+              Ketik atau tempel kalimat bahasa Arab lengkap dengan harakat untuk membedah susunan sintaksis (tarkib), kedudukan gramatikal kata, tanda i'rab, dan tinjauan morfologi (shorof) kata demi kata.
+            </p>
 
             <div className="flex flex-col sm:flex-row gap-3">
               <input
                 type="text"
                 dir="rtl"
                 value={customSentence}
-                onChange={(e) => setCustomSentence(e.target.value)}
-                placeholder="Contoh: ضَرَبَ زَيْدٌ عَمْرًا"
-                className="flex-1 font-serif text-xl sm:text-2xl px-5 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-emerald-500 focus:bg-white text-right"
+                onChange={(e) => handleSentenceInputChange(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !analyzing && customSentence.trim()) {
+                    e.preventDefault();
+                    handleRunAnalysis();
+                  }
+                }}
+                placeholder="Ketik kalimat Arab di sini (misal: كَتَبَ زَيْدٌ الدَّرْسَ)..."
+                className="flex-1 font-serif text-xl sm:text-2xl px-5 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-emerald-500 focus:bg-white text-right placeholder:text-slate-400 placeholder:text-base placeholder:font-sans"
+                disabled={analyzing}
               />
               <button
                 type="button"
                 onClick={() => handleRunAnalysis()}
                 disabled={analyzing || !customSentence.trim()}
-                className="px-6 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-md shadow-emerald-700/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                className="px-6 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-md shadow-emerald-700/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shrink-0"
               >
-                <Layers className="w-4 h-4" />
-                <span>{analyzing ? 'Menganalisis...' : 'Bedah I\'rab Sekarang'}</span>
+                <Layers className={`w-4 h-4 ${analyzing ? 'animate-spin' : ''}`} />
+                <span>{analyzing ? 'Menganalisis...' : "Bedah I'rab Sekarang"}</span>
               </button>
             </div>
           </div>
 
+          {/* Error Alert (Retains Previous Result) */}
+          {analysisError && (
+            <div className="p-4 sm:p-5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 flex items-start gap-3">
+              <Info className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+              <div className="text-xs sm:text-sm">
+                <p className="font-bold">Kendala Pemrosesan</p>
+                <p className="mt-0.5">{analysisError}</p>
+                {analysisResult && (
+                  <p className="mt-1.5 text-amber-800 text-xs font-medium">
+                    Hasil analisis sebelumnya untuk kalimat &quot;<span className="font-serif font-bold">{analysisResult.sentence}</span>&quot; tetap dipertahankan dan ditampilkan di bawah.
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Loading Indicator */}
+          {analyzing && (
+            <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-center gap-3 animate-pulse">
+              <div className="w-4 h-4 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin shrink-0"></div>
+              <p className="text-xs sm:text-sm font-medium">
+                Sedang membedah tarkib dan gramatika kalimat... Mohon tunggu sejenak.
+              </p>
+            </div>
+          )}
+
+          {/* Initial State when no analysis yet */}
+          {!analysisResult && !analyzing && !analysisError && (
+            <div className="bg-white rounded-3xl p-8 border border-dashed border-slate-300 text-center text-slate-500">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 mx-auto flex items-center justify-center mb-3">
+                <Layers className="w-6 h-6" />
+              </div>
+              <h4 className="text-sm font-bold text-slate-700">Belum Ada Kalimat yang Dianalisis</h4>
+              <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto leading-relaxed">
+                Silakan ketik kalimat bahasa Arab pada kolom input di atas, kemudian klik tombol <strong>&quot;Bedah I&apos;rab Sekarang&quot;</strong> untuk memulai telaah gramatikal.
+              </p>
+            </div>
+          )}
+
           {/* Analysis Output Section */}
           {analysisResult && (
-            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-6">
+            <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200 shadow-sm space-y-6">
+              {/* Notice if user changed input but hasn't clicked analyze */}
+              {customSentence.trim() && analyzedSentence && customSentence.trim() !== analyzedSentence && (
+                <div className="px-4 py-2 rounded-xl bg-slate-100 text-slate-600 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-1 border border-slate-200">
+                  <span>
+                    Menampilkan hasil analisis untuk: <strong className="font-serif text-slate-800 text-sm">{analysisResult.sentence}</strong>
+                  </span>
+                  <span className="text-emerald-700 font-medium text-[11px]">
+                    Tekan tombol &quot;Bedah I&apos;rab Sekarang&quot; untuk memproses kalimat baru yang sedang diketik
+                  </span>
+                </div>
+              )}
+
               {/* Top Summary Banner */}
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 p-5 rounded-2xl bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200">
                 <div>
