@@ -1,20 +1,13 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import {defineConfig} from 'vite';
-import expressApp from './api/index.ts';
+import { defineConfig } from 'vite';
 
 export default defineConfig(() => {
   return {
     plugins: [
       react(),
       tailwindcss(),
-      {
-        name: 'express-api-plugin',
-        configureServer(server) {
-          server.middlewares.use(expressApp);
-        },
-      },
     ],
     resolve: {
       alias: {

@@ -14,12 +14,24 @@ const MainLayout: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center text-white">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center text-3xl font-serif font-bold shadow-xl shadow-emerald-950 animate-pulse">
-          ن
+      <div className="min-h-screen bg-gradient-to-br from-emerald-800 via-emerald-700 to-teal-900 flex flex-col items-center justify-center text-white">
+        <div className="relative">
+          <div className="w-24 h-24 rounded-3xl bg-white/10 backdrop-blur-md border-2 border-emerald-400/40 flex items-center justify-center p-3 shadow-2xl shadow-emerald-950/40 animate-pulse">
+            <img
+              src="/assets/aistudio/logo-removebg-preview_62f4cdfa.png"
+              alt="SmartKib Logo"
+              className="w-full h-full object-contain filter drop-shadow-lg"
+            />
+          </div>
+          <div className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-emerald-500 border-2 border-white flex items-center justify-center text-white text-xs shadow-md">
+            ✨
+          </div>
         </div>
-        <p className="mt-4 text-emerald-300 text-sm font-medium tracking-wide">
-          Memuat NahwuLab • مَخْبَرُ النَّحْوِ
+        <p className="mt-5 text-white text-lg font-black tracking-wide">
+          Memuat SmartKib
+        </p>
+        <p className="mt-1 text-xs text-emerald-200 font-semibold">
+          Menyiapkan modul gramatika &amp; Musyrif SmartKib...
         </p>
       </div>
     );
@@ -31,7 +43,7 @@ const MainLayout: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col selection:bg-emerald-500 selection:text-white">
+    <div className="min-h-screen bg-[#F4FBF7] text-slate-800 flex flex-col selection:bg-emerald-600 selection:text-white">
       {/* Top Navigation */}
       <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
 
@@ -45,19 +57,23 @@ const MainLayout: React.FC = () => {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-200 bg-white py-6 text-center text-xs text-slate-500">
+      <footer className="border-t border-emerald-100 bg-white py-6 text-center text-xs text-slate-500 shadow-2xs">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <span className="font-serif font-bold text-emerald-800 text-sm">ن</span>
-            <span className="font-bold text-slate-700">NahwuLab</span>
-            <span>— Pendalaman Ilmu Nahwu & Shorof Berbasis AI</span>
+          <div className="flex items-center gap-2.5">
+            <img
+              src="/assets/aistudio/logo-removebg-preview_62f4cdfa.png"
+              alt="SmartKib"
+              className="w-6 h-6 object-contain"
+            />
+            <span className="font-extrabold text-slate-800">Smart<span className="text-emerald-600">Kib</span></span>
+            <span>— Pendalaman Ilmu Nahwu &amp; Sharaf Berbasis 6 Kitab Turats</span>
           </div>
-          <div className="flex items-center gap-4 text-slate-400">
-            <span>Matan Al-Jurumiyyah</span>
+          <div className="flex items-center gap-3 text-xs text-slate-500 font-medium">
+            <span className="hover:text-emerald-700 transition-colors">Al-Ajurumiyyah</span>
             <span>•</span>
-            <span>Al-Amtsilah At-Tashrifiyyah</span>
+            <span className="hover:text-emerald-700 transition-colors">Amtsilah Tashrifiyah</span>
             <span>•</span>
-            <span>Firebase & Gemini</span>
+            <span className="text-emerald-700 font-bold">Tanya Musyrif SmartKib</span>
           </div>
         </div>
       </footer>

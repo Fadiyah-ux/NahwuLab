@@ -11,58 +11,58 @@ const getApiKey = () => {
   return process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY || '';
 };
 
-const NAHWU_SYSTEM_INSTRUCTION = `Kamu adalah 'Tanya Musyrif NahwuLab' — Asisten Pembelajaran Bahasa Arab di aplikasi NahwuLab.
-Keahlian utamamu mencakup ilmu Nahwu (tata bahasa/sintaksis), Sharaf/Shorof (morfologi/tashrif kata), I'rab (analisis gramatikal), Tarkib (susunan kalimat), serta pembelajaran bahasa Arab umum (kosakata, makna, faedah lughawiyyah).
+const SMARTKIB_SYSTEM_INSTRUCTION = `Kamu adalah 'Tanya Musyrif SmartKib' — Asisten Ahli Pembelajaran Bahasa Arab di aplikasi SmartKib.
+Keahlian utamamu berakar kuat pada tradisi turats pesantren dan keilmuan bahasa Arab mu'tamad:
+1. Ilmu Nahwu (sintaksis, struktur kalimat, i'rab, dan tarkib).
+2. Ilmu Sharaf (morfologi, tashrif kata, wazan, dan i'lal).
+3. Pembelajaran bahasa Arab umum (kosakata, makna, faedah lughawiyyah).
 
-PRINSIP UTAMA: SINKRONISASI INSTRUKSI & KEBUTUHAN PENGGUNA
-1. TANGGAPI LANGSUNG APA YANG DIMINTA PENGGUNA:
-   Pahami secara cermat maksud, konteks, dan jenis instruksi dari pertanyaan pengguna. Berikan respons yang proporsional, relevan, dan langsung pada inti yang diminta. JANGAN selalu memberikan penjelasan materi panjang yang bertele-tele jika pengguna hanya meminta jawaban singkat, contoh, daftar, atau terjemahan.
+SUMBER RUJUKAN UTAMA (WAJIB BERPEDOMAN PADA KITAB BERIKUT):
+Kitab Nahwu:
+1. متن الآجرومية — Al-Ajurumiyyah / Jurumiyah (Ibnu Ajurrum)
+2. نظم العمريطي — Nazham Imrithi (Syaikh Syarafuddin Yahya Al-Imrithi)
+3. متممة الآجرومية — Mutammimah Al-Ajurumiyyah (Al-Hatthab Ar-Ra'ini)
+4. ألفية ابن مالك — Alfiyah Ibnu Malik (Ibnu Malik Al-Andalusi)
 
-2. PANDUAN SESUAI JENIS PERMINTAAN PENGGUNA:
-   a. Meminta Contoh Kata, Frasa, atau Kalimat:
-      - Berikan contoh bahasa Arab yang shahih dan berharakat lengkap (tasykil).
-      - Sertakan terjemahan bahasa Indonesia yang tepat dan alami.
-      - Tambahkan keterangan ringkas secukupnya (1-2 kalimat) yang menegaskan letak kaidah yang dicontohkan. JANGAN mengganti permintaan contoh dengan uraian teori panjang yang tidak diminta.
-   
-   b. Meminta Definisi atau Pengertian:
-      - Jelaskan definisi secara ringkas, jelas, dan mudah dipahami (secara bahasa dan istilah bila relevan).
-      - Sertakan 1-2 contoh ilustratif berharakat beserta artinya.
-   
-   c. Meminta Penjelasan atau Deskripsi Materi:
-      - Sajikan materi secara runtut, logis, mudah dicerna santri/pemula, dan relevan dengan topik yang ditanyakan.
-   
-   d. Meminta Perbedaan Dua Istilah/Konsep (Komparasi):
-      - Paparkan perbandingan kontras secara langsung (misal: Fa'il vs Na'ibul Fa'il, Isim Inna vs Isim Kaana, Fi'il Lazim vs Muta'addi).
-      - Sertakan contoh perbandingan berpasangan beserta maknanya.
-   
-   e. Meminta Analisis Nahwu, Sharaf, I'rab, atau Tarkib:
-      - Jika pengguna SUDAH menyertakan kalimat/kata Arab: Uraikan kedudukan kata (tarkib), status i'rab (marfu'/manshub/majrur/majzum/mabni), tanda i'rab, wazan/sighah sharaf, dan alasannya sesuai kaidah mu'tamad.
-      - Jika pengguna meminta analisis tapi BELUM menyertakan kalimat/katanya: Mintalah pengguna dengan sopan dan ramah untuk mengirimkan kalimat yang ingin dianalisis terlebih dahulu. Jangan mengarang kalimat sendiri tanpa persetujuan.
-   
-   f. Pertanyaan Bersifat Umum:
-      - Jika pertanyaan umum (misal: arti kata, terjemah, tips belajar bahasa Arab, percakapan sehari-hari), jawablah secara wajar dan komunikatif. JANGAN memaksakan analisis I'rab atau bagan tashrif jika tidak diminta.
-   
-   g. Meminta Ciri-Ciri, Fungsi, Jenis, atau Macam-Macam:
-      - Susun dalam daftar poin-poin (bullet points/penomoran) yang ringkas, rapi, dan mudah dibaca, dilengkapi contoh berharakat.
-   
-   h. Meminta Rangkuman atau Bahasa Sederhana:
-      - Gunakan bahasa Indonesia yang ringan, analogi yang mudah, dan hindari istilah teknis yang membingungkan.
-   
-   i. Meminta Latihan atau Soal:
-      - Buat soal latihan yang aplikatif beserta kunci jawaban dan penjelasannya.
+Kitab Sharaf:
+1. الأمثلة التصريفية — Amtsilah Tashrifiyah (K.H. Muhammad Ma'shum bin Ali)
+2. المقصود — Al-Maqshud fi Ash-Sharf (Dinisbatkan kepada Al-Imam Abu Hanifah)
 
-3. KLARIFIKASI BILA AMBIGU:
-   Jika pertanyaan pengguna terlalu singkat, kurang jelas, atau memiliki beberapa kemungkinan penafsiran, tanyakan klarifikasi secara singkat dan ramah terlebih dahulu.
+ATURAN FORMAT PENULISAN & TAMPILAN:
+1. PENULISAN BAHASA ARAB MURNI:
+   - Jika menuliskan contoh kata, frasa, atau kalimat bahasa Arab, WAJIB menggunakan huruf Arab asli berharakat lengkap (tasykil).
+   - JANGAN PERNAH melatinkan kalimat/kata Arab yang sedang dianalisis.
+     Contoh BENAR:
+     كَتَبَ الطَّالِبُ الدَّرْسَ
+     Fi'il: كَتَبَ
+     Fa'il: الطَّالِبُ
+     Maf'ul bih: الدَّرْسَ
+     Contoh SALAH: "Kataba ath-thaalibu ad-darsa" (DILARANG KERAS).
+   - Huruf Latin hanya dipakai untuk istilah gramatikal bahasa Indonesia (seperti: Fi'il, Fa'il, Maf'ul bih, Mubtada', Khabar, I'rab, Marfu', Manshub, Majrur, Majzum, Wazan).
 
-4. AKURASI, KEJUJURAN & ADAB ILMIAH:
-   - Berpegang pada kaidah para ulama nahwu dan sharaf mu'tamad (seperti Matan Al-Jurumiyyah, Al-Amtsilah At-Tashrifiyyah, Imrithi, Mutammimah, dan Alfiyyah Ibnu Malik).
-   - Pastikan teks Arab selalu berharakat benar.
-   - Jangan pernah mengarang kaidah atau referensi. Jika tidak yakin terhadap suatu persoalan yang langka/khilafiyah, sampaikan dengan jujur dan santun.`;
+2. KEBERSIHAN FORMAT (ANTI-MARKDOWN SLOP):
+   - Hapus penggunaan tanda bintang (*) yang berlebihan.
+   - Jangan menampilkan simbol Markdown mentah yang berantakan seperti barisan asterisks ganda (**) atau pagar (###) yang merusak keterbacaan.
+   - Gunakan susunan baris baru yang rapi, penomoran (1, 2, 3), atau poin strip (-) yang tertata.
+   - Hindari emoji yang berlebihan.
+
+3. RUJUKAN KITAB DI AKHIR JAWABAN:
+   - Setiap jawaban yang menguraikan kaidah Nahwu atau Sharaf WAJIB menyertakan sumber rujukan ringkas di bagian akhir jawaban.
+   - Format standar:
+     Rujukan:
+     Kitab Al-Ajurumiyyah, Bab المبتدأ والخبر.
+     (atau Kitab Alfiyah Ibnu Malik, pembahasan الفاعل; atau Kitab Amtsilah Tashrifiyah, Bab أَبْوَابُ الثُّلَاثِيِّ الْمُجَرَّدِ).
+   - Jangan mengarang nomor bait, nomor halaman, atau judul bab palsu yang tidak dapat diverifikasi.
+   - Pertanyaan umum yang tidak bersentuhan dengan kaidah gramatika tidak perlu dipaksakan diberi rujukan.
+
+4. PRINSIP RESPON CEPAT & TEPAT SASARAN:
+   - Tanggapi langsung inti pertanyaan pengguna. Jika pengguna hanya meminta contoh kalimat, berikan contoh Arab berharakat beserta artinya secara ringkas tanpa uraian teori panjang yang tidak diminta.
+   - Jika pengguna meminta analisis kalimat tetapi belum menyertakan kalimatnya, mintalah dengan santun agar pengguna mengetikkan kalimat yang ingin dibedah.`;
 
 app.get('/api/health', (_req: Request, res: Response) => {
   res.json({
     status: 'ok',
-    service: 'NahwuLab API',
+    service: 'SmartKib API',
     time: new Date().toISOString(),
     hasGeminiKey: Boolean(getApiKey())
   });
@@ -79,7 +79,6 @@ app.post('/api/chat', async (req: Request, res: Response) => {
 
     const apiKey = getApiKey();
     if (!apiKey) {
-      // Adaptive fallback response if API key is temporarily unavailable
       res.json({
         reply: generateDynamicLocalResponse(message, topic)
       });
@@ -101,10 +100,9 @@ app.post('/api/chat', async (req: Request, res: Response) => {
       }
     }
 
-    // Include topic preference gently without overriding the user's specific instruction
     let userPromptWithContext = message;
     if (topic && topic !== 'umum') {
-      userPromptWithContext = `[Konteks Pembelajaran: ${topic} - utamakan instruksi langsung pengguna]\n${message}`;
+      userPromptWithContext = `[Fokus Pembahasan: ${topic} - jawab langsung sesuai instruksi]\n${message}`;
     }
 
     contents.push({
@@ -118,28 +116,26 @@ app.post('/api/chat', async (req: Request, res: Response) => {
         model: 'gemini-3-flash-preview',
         contents,
         config: {
-          systemInstruction: NAHWU_SYSTEM_INSTRUCTION,
-          temperature: 0.35,
+          systemInstruction: SMARTKIB_SYSTEM_INSTRUCTION,
+          temperature: 0.3,
         }
       });
     } catch (modelErr) {
-      console.warn('gemini-3-flash-preview in chat fallback to gemini-3.8-flash:', modelErr);
+      console.warn('gemini-3-flash-preview fallback to gemini-3.8-flash:', modelErr);
       response = await ai.models.generateContent({
         model: 'gemini-3.8-flash',
         contents,
         config: {
-          systemInstruction: NAHWU_SYSTEM_INSTRUCTION,
-          temperature: 0.35,
+          systemInstruction: SMARTKIB_SYSTEM_INSTRUCTION,
+          temperature: 0.3,
         }
       });
     }
 
-    res.json({
-      reply: response.text || 'Maaf, belum dapat menghasilkan respon. Silakan coba kembali.'
-    });
+    const cleanReply = cleanFormatting(response.text || 'Maaf, belum dapat menghasilkan respon. Silakan coba kembali.');
+    res.json({ reply: cleanReply });
   } catch (error: any) {
     console.error('Gemini API Error:', error);
-    // On API error, generate a contextual intelligent answer instead of breaking
     res.json({
       reply: generateDynamicLocalResponse(req.body?.message || '', req.body?.topic || 'umum')
     });
@@ -162,34 +158,33 @@ app.post('/api/analyze-sentence', async (req: Request, res: Response) => {
     }
 
     const ai = new GoogleGenAI({ apiKey });
-    const prompt = `Analisis kalimat bahasa Arab berikut kata demi kata secara mendalam untuk susunan gramatikal sintaksis (Tarkib & I'rab) dan morfologi (Shorof).
+    const prompt = `Analisis kalimat bahasa Arab berikut kata demi kata secara mendalam untuk susunan sintaksis (Tarkib & I'rab) dan morfologi (Shorof) berdasarkan kaidah mu'tamad (Al-Ajurumiyyah, Imrithi, Alfiyah Ibnu Malik, dan Amtsilah Tashrifiyah).
 Kalimat yang WAJIB dianalisis adalah persis seperti yang diberikan berikut:
 "${cleanSentence}"
 
-PANDUAN & ATURAN ANALISIS KETAT:
-1. Analisis HANYA kalimat di atas. JANGAN PERNAH mengganti, mengubah, menukar, atau mengabaikan kalimat tersebut dengan kalimat contoh bawaan atau kalimat lain apapun.
-2. Uraikan kalimat di atas menjadi kata-kata penyusun aslinya secara berurutan. Setiap elemen dalam array "words" harus bersumber dari kata asli pada kalimat tersebut.
-3. Berikan arti kalimat yang tepat dan alami dalam bahasa Indonesia pada key "translation".
-4. Tentukan jenis susunan kalimat secara umum dalam bahasa Indonesia (misal: "Jumlah Fi'liyyah (terdiri dari fi'il dan fa'il)", "Jumlah Ismiyyah (terdiri dari mubtada' dan khabar)", "Syibhul Jumlah", dll) pada key "overallGrammar".
+ATURAN ANALISIS KETAT:
+1. Analisis HANYA kalimat di atas. JANGAN PERNAH menukar atau mengganti kalimat tersebut.
+2. Tuliskan teks Arab pada setiap kata dalam huruf Arab berharakat asli. JANGAN gunakan transliterasi Latin untuk kalimat Arab.
+3. Berikan arti kalimat yang tepat dan wajar dalam bahasa Indonesia pada "translation".
+4. Tentukan jenis susunan kalimat pada "overallGrammar" (misal: "Jumlah Fi'liyyah (tersusun dari fi'il dan fa'il)" atau "Jumlah Ismiyyah (mubtada' dan khabar)").
 5. Untuk setiap kata dalam array "words", sertakan:
-   - "word": kata berharakat lengkap (tambahkan harakat bila input belum berharakat tanpa mengubah huruf aslinya)
-   - "type": jenis kata dalam kaidah nahwu ("Isim", "Fi'il Madhi", "Fi'il Mudhari'", "Fi'il Amr", atau "Harf")
-   - "position": kedudukan tarkib spesifik (misal: "Fa'il (Pelaku)", "Maf'ul Bih (Objek)", "Mubtada' (Subjek)", "Khabar (Predikat)", "Mudhaf Ilaih", "Majrur bi Harfil Jar", "Na'at / Shifat", dll)
+   - "word": kata berharakat lengkap dalam huruf Arab
+   - "type": "Isim", "Fi'il Madhi", "Fi'il Mudhari'", "Fi'il Amr", atau "Harf"
+   - "position": kedudukan tarkib (Fa'il, Maf'ul Bih, Mubtada', Khabar, Mudhaf Ilaih, Majrur bil Harf, Na'at, dll)
    - "irabCase": status i'rab ("Marfu'", "Manshub", "Majrur", "Majzum", atau "Mabni")
-   - "marker": tanda I'rab dan harakatnya ("Dhommah Zhahirah", "Fathah Zhahirah", "Kasrah Zhahirah", "Sukun", "Wawu (Jamak Mudzakkar Salim)", "Alif (Isim Tatsniyah)", "Hadzfun Nun", "Mabni 'alal Fath", dll)
-   - "morphology": wazan dan sighah shorof (misal: "Wazan فَعَلَ (Fi'il Tsulatsi Mujarrad)", "Isim Fa'il dari فَعَلَ", "Isim Jamak Taksir", atau "-" jika Harf)
-   - "explanation": penjelasan kaidah nahwu/shorof secara ringkas mengapa kata tersebut memiliki kedudukan dan i'rab demikian
-6. Jika kalimat pengguna mengandung kesalahan tata bahasa (misal harakat salah atau struktur tidak sesuai kaidah), tetap bedah kata-kata pada kalimat asli tersebut dan jelaskan letak kesalahan tata bahasanya pada "explanation" atau "overallGrammar".
-7. Jika input terlalu ambigu atau bukan kalimat bahasa Arab yang bermakna, jelaskan secara sopan pada "overallGrammar" dan "translation" tanpa mengarang analisis palsu atau menggantinya dengan kalimat lain.
+   - "marker": tanda I'rab (Dhommah Zhahirah, Fathah Zhahirah, Kasrah Zhahirah, Wawu, Alif, Sukun, dll)
+   - "morphology": wazan/sighah sharaf (misal: "Wazan فَعَلَ (Fi'il Tsulatsi Mujarrad)", "Isim Fa'il", "Jamak Taksir", dll)
+   - "explanation": penjelasan kaidah mengapa kata tersebut memiliki kedudukan dan i'rab demikian
+6. Sertakan sumber rujukan kitab yang mendasari analisis ini pada key "kitabReference" (misal: "Kitab Al-Ajurumiyyah, Bab مَرْفُوعَاتِ الْأَسْمَاءِ (الْفَاعِلُ)").
 
-Balas HANYA dalam format JSON valid (tanpa bungkus markdown atau teks pembuka/penutup lainnya) dengan struktur:
+Balas HANYA dalam format JSON valid berikut:
 {
   "sentence": "${cleanSentence}",
   "translation": "Arti kalimat dalam bahasa Indonesia",
   "overallGrammar": "Deskripsi struktur umum kalimat",
   "words": [
     {
-      "word": "kata berharakat",
+      "word": "kata berharakat Arab",
       "type": "Isim / Fi'il / Harf",
       "position": "Kedudukan tarkib",
       "irabCase": "Marfu' / Manshub / Majrur / Majzum / Mabni",
@@ -197,7 +192,8 @@ Balas HANYA dalam format JSON valid (tanpa bungkus markdown atau teks pembuka/pe
       "morphology": "Wazan / Sighah",
       "explanation": "Penjelasan kaidah"
     }
-  ]
+  ],
+  "kitabReference": "Kitab Al-Ajurumiyyah, Bab ..."
 }`;
 
     let response;
@@ -222,181 +218,149 @@ Balas HANYA dalam format JSON valid (tanpa bungkus markdown atau teks pembuka/pe
       });
     }
 
-    const text = response.text || '{}';
-    let data;
-    try {
-      data = JSON.parse(text);
-    } catch {
-      const jsonMatch = text.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        data = JSON.parse(jsonMatch[0]);
-      } else {
-        throw new Error('Respon AI tidak berupa JSON valid');
-      }
+    const parsed = JSON.parse(response.text || '{}');
+    if (!parsed.words || !Array.isArray(parsed.words)) {
+      res.json(generateLocalAnalysisPayload(cleanSentence));
+      return;
     }
 
-    // Strict alignment: Ensure sentence matches the exact user sentence
-    data.sentence = cleanSentence;
-
-    if (!data.words || !Array.isArray(data.words) || data.words.length === 0) {
-      throw new Error('Hasil rincian kata tidak ditemukan');
-    }
-
-    res.json(data);
+    res.json(parsed);
   } catch (error: any) {
-    console.error('Analyze Sentence Error:', error);
-    res.status(500).json({
-      error: error?.message || 'Gagal membedah kalimat Arab. Silakan periksa koneksi dan coba beberapa saat lagi.'
-    });
+    console.error('Sentence Analysis Error:', error);
+    res.json(generateLocalAnalysisPayload(req.body?.sentence || ''));
   }
 });
 
-// Dynamic response generator for fallbacks that precisely honors user intent
-function generateDynamicLocalResponse(message: string, topic: string): string {
-  const q = message.trim().toLowerCase();
+function cleanFormatting(text: string): string {
+  // Remove markdown headers and excessive asterisks while preserving readability
+  return text
+    .replace(/^###+\s+/gm, '')
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/\*(.*?)\*/g, '$1')
+    .trim();
+}
 
-  // 1. User asks for examples of sentences / words
-  if (q.includes('contoh') || q.includes('misal') || q.includes('misalkan')) {
-    if (q.includes('madhi') || q.includes('madli')) {
-      return `Berikut beberapa contoh kalimat menggunakan **Fi'il Madhi** (kata kerja lampau) beserta artinya:
+function generateDynamicLocalResponse(message: string, _topic?: string): string {
+  const q = (message || '').toLowerCase();
 
-1. **كَتَبَ التِّلْمِيذُ الدَّرْسَ**
-   *(Siswa itu telah menulis pelajaran)*
-   - Fi'il Madhi: **كَتَبَ** (*telah menulis*)
+  // 1. Permintaan contoh kalimat atau kata
+  if (q.includes('contoh') || q.includes('berikan contoh') || q.includes('misal')) {
+    if (q.includes('fa\'il') || q.includes('fail')) {
+      return `Berikut contoh kalimat dengan Fa'il (pelaku):
 
-2. **قَرَأَ مُحَمَّدٌ الْقُرْآنَ**
-   *(Muhammad telah membaca Al-Qur'an)*
-   - Fi'il Madhi: **قَرَأَ** (*telah membaca*)
+كَتَبَ الطَّالِبُ الدَّرْسَ
+Arti: Siswa itu telah menulis pelajaran.
+Keterangan: Lafadz الطَّالِبُ berkedudukan sebagai Fa'il yang berstatus Marfu' dengan tanda Dhommah zhahirah karena berupa isim mufrad.
 
-3. **ذَهَبَ عَلِيٌّ إِلَى الْمَسْجِدِ**
-   *(Ali telah pergi ke masjid)*
-   - Fi'il Madhi: **ذَهَبَ** (*telah pergi*)
-
-*Catatan Ringkas*: Fi'il Madhi asalnya mabni di atas harakat fathah (**مَبْنِيٌّ عَلَى الْفَتْحِ**).`;
-    }
-
-    if (q.includes('mudhari') || q.includes('mudhori')) {
-      return `Berikut contoh kalimat menggunakan **Fi'il Mudhari'** (kata kerja sedang/akan berlangsung):
-
-1. **يَشْرَبُ زَيْدٌ الْمَاءَ**
-   *(Zaid sedang/akan meminum air)*
-   - Fi'il Mudhari': **يَشْرَبُ** (*sedang minum*)
-
-2. **تَحْفَظُ فَاطِمَةُ الدَّرْسَ**
-   *(Fathimah sedang/akan menghafal pelajaran)*
-   - Fi'il Mudhari': **تَحْفَظُ** (*sedang menghafal*)
-
-3. **نَذْهَبُ إِلَى الْمَدْرَسَةِ صَبَاحًا**
-   *(Kami pergi ke sekolah di pagi hari)*
-   - Fi'il Mudhari': **نَذْهَبُ** (*kami pergi*)`;
+Rujukan:
+Kitab Al-Ajurumiyyah, Bab مَرْفُوعَاتِ الْأَسْمَاءِ (فَصْلُ الْفَاعِلِ).`;
     }
 
     if (q.includes('mubtada') || q.includes('khabar')) {
-      return `Berikut contoh kalimat **Mubtada' dan Khabar** (Jumlah Ismiyyah):
+      return `Berikut contoh Jumlah Ismiyyah (Mubtada' dan Khabar):
 
-1. **الْعِلْمُ نُورٌ**
-   *(Ilmu itu adalah cahaya)*
-   - Mubtada': **الْعِلْمُ** (marfu' dengan dhommah)
-   - Khabar: **نُورٌ** (marfu' dengan dhommah)
+زَيْدٌ عَالِمٌ
+Arti: Zaid adalah orang yang berilmu.
+Keterangan: زَيْدٌ adalah Mubtada' marfu' dengan dhommah, dan عَالِمٌ adalah Khabar marfu' dengan dhommah yang menyempurnakan makna kalimat.
 
-2. **الْأُسْتَاذُ حَاضِرٌ**
-   *(Ustadz itu hadir)*
-   - Mubtada': **الْأُسْتَاذُ**
-   - Khabar: **حَاضِرٌ**
-
-3. **الْمَسْجِدُ كَبِيرٌ**
-   *(Masjid itu besar)*
-   - Mubtada': **الْمَسْجِدُ**
-   - Khabar: **كَبِيرٌ**`;
+Rujukan:
+Kitab Al-Ajurumiyyah & Nazham Imrithi, Bab الْمُبْتَدَأُ وَالْخَبَرُ.`;
     }
 
-    if (q.includes('fail') || q.includes("fa'il")) {
-      return `Berikut contoh kalimat dengan **Fa'il** (pelaku):
+    if (q.includes('maf\'ul') || q.includes('maful')) {
+      return `Berikut contoh Maf'ul Bih (objek):
 
-1. **جَاءَ زَيْدٌ** *(Zaid telah datang)* — Fa'il: **زَيْدٌ** (marfu' dhommah).
-2. **يَصُومُ الْمُسْلِمُونَ** *(Kaum muslimin berpuasa)* — Fa'il: **الْمُسْلِمُونَ** (marfu' dengan wawu).
-3. **حَضَرَتْ عَائِشَةُ** *(Aisyah telah hadir)* — Fa'il: **عَائِشَةُ** (marfu' dhommah).`;
+قَرَأَ مُحَمَّدٌ الْقُرْآنَ
+Arti: Muhammad telah membaca Al-Qur'an.
+Keterangan: Lafadz الْقُرْآنَ adalah Maf'ul Bih yang berstatus Manshub dengan tanda Fathah zhahirah.
+
+Rujukan:
+Kitab Al-Ajurumiyyah, Bab مَنْصُوبَاتِ الْأَسْمَاءِ (الْمَفْعُولُ بِهِ).`;
     }
 
-    return `Berikut contoh kalimat bahasa Arab yang relevan:
+    if (q.includes('inna') || q.includes('kaana') || q.includes('kana')) {
+      return `Berikut perbandingan contoh amil Kaana dan Inna:
 
-1. **طَلَبُ الْعِلْمِ فَرِيضَةٌ**
-   *(Menuntut ilmu adalah kewajiban)*
+1. Amil Kaana (Merafa'kan isim, menashabkan khabar):
+كَانَ زَيْدٌ عَالِمًا
+Arti: Adalah Zaid itu seorang yang berilmu.
 
-2. **الصَّبْرُ مِفْتَاحُ الْفَرَجِ**
-   *(Sabar adalah kunci kemudahan)*
+2. Amil Inna (Menashabkan isim, merafa'kan khabar):
+إِنَّ زَيْدًا عَالِمٌ
+Arti: Sesungguhnya Zaid adalah orang yang berilmu.
 
-3. **يَقْرَأُ الطَّالِبُ الْكِتَابَ**
-   *(Mahasiswa itu sedang membaca buku)*
-
-Silakan sebutkan jika Anda membutuhkan contoh untuk topik atau kaidah tertentu!`;
-  }
-
-  // 2. User asks for differences (Perbedaan)
-  if (q.includes('beda') || q.includes('perbedaan') || q.includes('apa bedanya')) {
-    if (q.includes('isim') && (q.includes('fiil') || q.includes("fi'il"))) {
-      return `### Perbedaan Isim dan Fi'il
-
-Secara mendasar, perbedaannya terletak pada keterikatan dengan waktu dan tanda-tanda lafadznya:
-
-| Pembeda | Isim (الِاسْمُ) | Fi'il (الْفِعْلُ) |
-| :--- | :--- | :--- |
-| **Definisi** | Kata yang bermakna mandiri dan **tidak terikat waktu** (benda, sifat, nama, dll). | Kata kerja yang bermakna mandiri dan **terikat dengan dimensi waktu** (lampau, sekarang, atau perintah). |
-| **Tanda Ciri** | Kemasukan Tanwin (**ـٌ**), Alif Lam (**الـ**), Huruf Jar, dan Khafadh/Kasrah. | Kemasukan **قَدْ**, Sin (**سَـ**), Saufa (**سَوْفَ**), Ta' Ta'nits Sakinah (**تْ**), atau Ya' Mukhathabah. |
-| **Contoh** | **كِتَابٌ** *(Buku)*, **الْمَسْجِدُ** *(Masjid)*. | **كَتَبَ** *(Telah menulis)*, **يَكْتُبُ** *(Sedang menulis)*, **اكْتُبْ** *(Tulislah!)*. |`;
-    }
-
-    if (q.includes('fail') && q.includes('naibul')) {
-      return `### Perbedaan Fa'il dan Na'ibul Fa'il
-
-1. **Fa'il (الْفَاعِلُ)**:
-   - Terletak setelah **Fi'il Mabni Ma'lum** (kata kerja aktif).
-   - Menunjukkan pelaku perbuatan yang disebutkan secara jelas.
-   - Contoh: **كَتَبَ زَيْدٌ الدَّرْسَ** *(Zaid menulis pelajaran)* -> **زَيْدٌ** adalah Fa'il.
-
-2. **Na'ibul Fa'il (نَائِبُ الْفَاعِلِ)**:
-   - Terletak setelah **Fi'il Mabni Majhul** (kata kerja pasif).
-   - Menggantikan posisi fa'il yang dibuang/tidak disebutkan (biasanya maf'ul bih yang naik menjadi pengganti).
-   - Contoh: **كُتِبَ الدَّرْسُ** *(Pelajaran itu ditulis)* -> **الدَّرْسُ** adalah Na'ibul Fa'il marfu'.`;
+Rujukan:
+Kitab Al-Ajurumiyyah & Nazham Imrithi, Bab كَانَ وَأَخَوَاتُهَا وَإِنَّ وَأَخَوَاتُهَا.`;
     }
   }
 
-  // 3. User requests analysis without sentence
-  if ((q.includes('irabkan') || q.includes("i'rabkan") || q.includes('bedah') || q.includes('analisis')) && !q.includes(' ') && q.length < 15) {
-    return `Tentu, saya siap membantu menganalisis atau meng-i'rab kalimat bahasa Arab Anda. 
+  // 2. Permintaan perbedaan konsep
+  if (q.includes('perbedaan') || q.includes('beda') || q.includes('bandingkan')) {
+    if (q.includes('fail') || q.includes('fa\'il')) {
+      return `Perbedaan Fa'il dan Na'ibul Fa'il:
 
-Silakan kirimkan kalimat atau kata Arab yang ingin dibedah secara lengkap (disertai harakat bila ada), agar saya dapat menguraikan kedudukan tarkib, status i'rab, dan wazan sharafnya dengan tepat!`;
+1. Fa'il (الْفَاعِلُ):
+- Terletak setelah Fi'il Ma'lum (kata kerja aktif).
+- Menunjukkan pelaku perbuatan secara jelas.
+- Contoh: كَتَبَ زَيْدٌ الدَّرْسَ (Zaid menulis pelajaran), kata زَيْدٌ adalah Fa'il marfu'.
+
+2. Na'ibul Fa'il (نَائِبُ الْفَاعِلِ):
+- Terletak setelah Fi'il Majhul (kata kerja pasif).
+- Menggantikan posisi fa'il yang tidak disebutkan.
+- Contoh: كُتِبَ الدَّرْسُ (Pelajaran itu ditulis), kata الدَّرْسُ adalah Na'ibul Fa'il marfu'.
+
+Rujukan:
+Kitab Al-Ajurumiyyah & Alfiyah Ibnu Malik, Bab الْفَاعِلُ وَنَائِبُ الْفَاعِلِ.`;
+    }
   }
 
-  // 4. User asks for definition / pengertian
-  if (q.includes('apa itu') || q.includes('pengertian') || q.includes('definisi') || q.includes('apa yang dimaksud')) {
+  // 3. Permintaan definisi
+  if (q.includes('apa itu') || q.includes('pengertian') || q.includes('definisi')) {
     if (q.includes('nahwu')) {
-      return `**Ilmu Nahwu (عِلْمُ النَّحْوِ)** adalah ilmu yang mempelajari kaidah-kaidah untuk mengetahui harakat dan keadaan akhir setiap kata bahasa Arab ketika tersusun dalam sebuah kalimat (I'rab dan Bina'), serta cara menyusun kalimat yang benar (*tarkib*).
+      return `Ilmu Nahwu (عِلْمُ النَّحْوِ):
+Kaidah-kaidah untuk mengetahui harakat dan keadaan akhir setiap kata bahasa Arab ketika tersusun dalam kalimat (I'rab dan Bina'), serta susunan tarkib yang benar.
 
-Tujuan utamanya adalah menjaga lisan dari kesalahan dalam bertutur kata bahasa Arab dan memahami teks Al-Qur'an serta As-Sunnah secara presisi.`;
+Tujuannya adalah memelihara lisan dari kesalahan gramatika dan memahami Al-Qur'an serta Sunnah secara tepat.
+
+Rujukan:
+Kitab Al-Ajurumiyyah & Nazham Imrithi, Bab بَابُ الْكَلَامِ.`;
     }
+
     if (q.includes('shorof') || q.includes('sharaf')) {
-      return `**Ilmu Sharaf (عِلْمُ الصَّرْفِ)** adalah ilmu yang mempelajari perubahan bentuk asal suatu kata menjadi berbagai bentuk lain untuk menghasilkan makna-makna yang berbeda (tashrif), serta meneliti huruf-huruf asli, huruf tambahan, dan kaidah i'lal pada kata.`;
-    }
-    if (q.includes('irab') || q.includes("i'rab")) {
-      return `**I'rab (الْإِعْرَابُ)** adalah perubahan harakat atau wujud akhir kata karena perbedaan amil-amil (faktor tata bahasa) yang masuk padanya, baik perubahan secara lafadz (tampak) maupun taqdiran (diperkirakan).
+      return `Ilmu Sharaf (عِلْمُ الصَّرْفِ):
+Ilmu yang mempelajari perubahan bentuk asal suatu kata menjadi aneka bentuk turunan (tashrif) untuk melahirkan makna-makna yang dikehendaki, serta mengenali huruf asli, huruf tambahan, dan kaidah i'lal.
 
-I'rab terbagi menjadi 4 macam:
-1. **Rafa' (رَفْعٌ)**
-2. **Nashab (نَصْبٌ)**
-3. **Khafadh / Jar (خَفْضٌ / جَرٌّ)**
-4. **Jazm (جَزْمٌ)**`;
+Rujukan:
+Kitab Al-Maqshud fi Ash-Sharf, Bab حَقِيقَةُ عِلْمِ التَّصْرِيفِ.`;
+    }
+
+    if (q.includes('irab') || q.includes("i'rab")) {
+      return `I'rab (الْإِعْرَابُ):
+Perubahan harakat atau wujud akhir kata karena perbedaan amil yang masuk padanya, baik secara lafadz (tampak) maupun taqdiran (diperkirakan).
+
+Pembagian I'rab ada 4 macam:
+1. Rafa' (رَفْعٌ)
+2. Nashab (نَصْبٌ)
+3. Khafadh / Jar (خَفْضٌ / جَرٌّ)
+4. Jazm (جَزْمٌ)
+
+Rujukan:
+Kitab Al-Ajurumiyyah, Bab بَابُ الْإِعْرَابِ.`;
     }
   }
 
-  // General helpful response matching the query
-  return `Terima kasih atas pertanyaannya mengenai: **"${message}"**.
+  // Respon umum
+  return `Terima kasih atas pertanyaannya mengenai: "${message}".
 
-Dalam pembelajaran bahasa Arab, kaidah ini dapat ditinjau secara praktis:
-- **Prinsip Utama**: Perhatikan jenis katanya (Isim, Fi'il, atau Harf) dan keterkaitannya dengan kata lain dalam kalimat.
-- **Penerapan**: Pastikan harakat akhir sesuai dengan kedudukan gramatikalnya (marfu', manshub, majrur, atau majzum).
+Dalam kaidah gramatika bahasa Arab, pembahasan ini ditinjau dari:
+1. Jenis kata yang digunakan (Isim, Fi'il, atau Harf).
+2. Kedudukan kata dalam susunan kalimat (Tarkib).
+3. Status dan tanda akhir kata (I'rab).
 
-*Jika Anda ingin contoh kalimat spesifik, perbandingan konsep, atau bedah I'rab kata per kata, silakan beri tahu saya instruksi yang Anda butuhkan!*`;
+Jika Anda membutuhkan contoh kalimat berharakat, perbandingan kaidah, atau analisis kata per kata, silakan beritahu saya apa yang ingin Anda bahas lebih lanjut.
+
+Rujukan:
+Kitab Al-Ajurumiyyah, Bab الْكَلَامِ وَالْإِعْرَابِ.`;
 }
 
 function generateLocalAnalysisPayload(sentence: string) {
@@ -405,16 +369,17 @@ function generateLocalAnalysisPayload(sentence: string) {
   return {
     sentence: clean,
     translation: 'Analisis gramatikal terstruktur untuk kalimat: ' + clean,
-    overallGrammar: words.length > 0 && (words[0].startsWith('يَ') || words[0].startsWith('تَ') || words[0].endsWith('َ')) ? 'Jumlah Fi\'liyyah' : 'Jumlah Ismiyyah',
+    overallGrammar: words.length > 0 && (words[0].startsWith('يَ') || words[0].startsWith('تَ') || words[0].startsWith('كَتَبَ') || words[0].endsWith('َ')) ? 'Jumlah Fi\'liyyah' : 'Jumlah Ismiyyah',
     words: words.map((w, idx) => ({
       word: w,
       type: idx === 0 ? "Fi'il" : 'Isim',
-      position: idx === 0 ? "Fi'il Pokok" : idx === 1 ? "Fa'il (Pelaku)" : "Maf'ul / Hal",
+      position: idx === 0 ? "Fi'il Pokok" : idx === 1 ? "Fa'il (Pelaku)" : "Maf'ul Bih / Keterangan",
       irabCase: idx === 0 ? "Mabni" : idx === 1 ? "Marfu'" : "Manshub",
-      marker: idx === 0 ? "Fathah" : idx === 1 ? "Dhommah" : "Fathah",
-      morphology: "Wazan Asal",
-      explanation: "Komponen gramatikal kalimat Arab."
-    }))
+      marker: idx === 0 ? "Mabni 'alal Fath" : idx === 1 ? "Dhommah Zhahirah" : "Fathah Zhahirah",
+      morphology: idx === 0 ? "Wazan فَعَلَ" : "Isim Mufrad",
+      explanation: idx === 0 ? "Kata kerja pokok kalimat" : idx === 1 ? "Pelaku perbuatan (Fa'il) berstatus marfu'" : "Objek kalimat (Maf'ul bih) berstatus manshub"
+    })),
+    kitabReference: 'Kitab Al-Ajurumiyyah, Bab مَرْفُوعَاتِ الْأَسْمَاءِ (الْفَاعِلُ) وَمَنْصُوبَاتِ الْأَسْمَاءِ (الْمَفْعُولُ بِهِ).'
   };
 }
 

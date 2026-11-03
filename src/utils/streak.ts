@@ -30,7 +30,7 @@ export function calculateStreak(
   currentStreak: number,
   todayStr: string = getTodayDateString()
 ): StreakResult {
-  if (!lastLoginDate) {
+  if (!lastLoginDate || currentStreak === 0) {
     return {
       newStreak: 1,
       isNewDay: true,
@@ -40,7 +40,7 @@ export function calculateStreak(
 
   if (lastLoginDate === todayStr) {
     return {
-      newStreak: Math.max(1, currentStreak),
+      newStreak: currentStreak,
       isNewDay: false,
       streakMaintained: true,
     };

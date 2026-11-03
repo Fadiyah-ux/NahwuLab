@@ -50,30 +50,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const newProfile: UserProfile = {
           uid,
           email,
-          displayName: displayName || (isUserAdmin ? 'Ustadzah Izzah Fadiyah (Admin)' : 'Santri NahwuLab'),
+          displayName: displayName || (isUserAdmin ? 'Ustadzah Izzah Fadiyah (Admin)' : 'Santri SmartKib'),
           photoURL: photoURL || '',
           role: isUserAdmin ? 'admin' : 'student',
-          currentStreak: 1,
-          longestStreak: 1,
+          currentStreak: 0,
+          longestStreak: 0,
           lastLoginDate: todayStr,
           totalExercisesCompleted: 0,
-          xp: 50,
+          xp: 0,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
 
         await setDoc(userDocRef, newProfile);
         setUserProfile(newProfile);
-
-        // Record initial streak log
-        const logRef = doc(db, 'users', uid, 'streakLogs', todayStr);
-        await setDoc(logRef, {
-          userId: uid,
-          date: todayStr,
-          activityType: 'login',
-          points: 10,
-          timestamp: new Date().toISOString(),
-        } as StreakLogItem);
 
         // If admin, also ensure admins collection entry
         if (isUserAdmin) {
@@ -85,40 +75,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       } else {
         const data = snap.data() as UserProfile;
-        const streakCalc = calculateStreak(data.lastLoginDate, data.currentStreak || 1, todayStr);
-
         let updatedData = { ...data };
-        if (streakCalc.isNewDay) {
-          const newLongest = Math.max(data.longestStreak || 1, streakCalc.newStreak);
-          updatedData = {
-            ...updatedData,
-            currentStreak: streakCalc.newStreak,
-            longestStreak: newLongest,
-            lastLoginDate: todayStr,
-            updatedAt: new Date().toISOString(),
-          };
-
-          await updateDoc(userDocRef, {
-            currentStreak: streakCalc.newStreak,
-            longestStreak: newLongest,
-            lastLoginDate: todayStr,
-            updatedAt: new Date().toISOString(),
-          });
-
-          // Log daily streak
-          const logRef = doc(db, 'users', uid, 'streakLogs', todayStr);
-          await setDoc(logRef, {
-            userId: uid,
-            date: todayStr,
-            activityType: 'login',
-            points: 15,
-            timestamp: new Date().toISOString(),
-          } as StreakLogItem);
-        }
 
         // Guarantee admin role if email matches
         if (isUserAdmin && updatedData.role !== 'admin') {
           updatedData.role = 'admin';
+        }
+
+        // Ensure existing users without xp are not NaN
+        if (typeof updatedData.xp !== 'number') {
+          updatedData.xp = 0;
         }
 
         setUserProfile(updatedData);
@@ -130,14 +96,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUserProfile({
         uid,
         email,
-        displayName: displayName || (isUserAdmin ? 'Ustadzah Izzah Fadiyah (Admin)' : 'Santri NahwuLab'),
+        displayName: displayName || (isUserAdmin ? 'Ustadzah Izzah Fadiyah (Admin)' : 'Santri SmartKib'),
         photoURL: photoURL || '',
         role: isUserAdmin ? 'admin' : 'student',
-        currentStreak: 1,
-        longestStreak: 1,
+        currentStreak: 0,
+        longestStreak: 0,
         lastLoginDate: todayStr,
         totalExercisesCompleted: 0,
-        xp: 50,
+        xp: 0,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });
@@ -148,7 +114,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     testFirestoreConnection();
 
     // Check for saved local admin session if Firebase Auth was offline or used custom demo credentials
-    const localSession = localStorage.getItem('nahwulab_admin_session');
+    const localSession = localStorage.getItem('smartkib_admin_session') || localStorage.getItem('nahwulab_admin_session');
     if (localSession) {
       try {
         const parsed = JSON.parse(localSession);
@@ -158,6 +124,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return;
         }
       } catch {
+        localStorage.removeItem('smartkib_admin_session');
         localStorage.removeItem('nahwulab_admin_session');
       }
     }
@@ -167,7 +134,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (user && user.email) {
         await syncUserStreakAndProfile(user.uid, user.email, user.displayName, user.photoURL);
       } else {
-        const storedAdmin = localStorage.getItem('nahwulab_admin_session');
+        const storedAdmin = localStorage.getItem('smartkib_admin_session') || localStorage.getItem('nahwulab_admin_session');
         if (!storedAdmin) {
           setUserProfile(null);
         }
@@ -288,13 +255,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const incrementExercisesCompleted = async (xpGain: number = 20) => {
     if (!userProfile) return;
+    const todayStr = getTodayDateString();
     const newCount = (userProfile.totalExercisesCompleted || 0) + 1;
-    const newXp = (userProfile.xp || 50) + xpGain;
+    const currentXp = typeof userProfile.xp === 'number' ? userProfile.xp : 0;
+    const newXp = currentXp + xpGain;
 
-    const updated = {
+    // Calculate streak upon completing an exercise
+    const streakCalc = calculateStreak(userProfile.lastLoginDate, userProfile.currentStreak || 0, todayStr);
+    const newCurrentStreak = Math.max(1, streakCalc.newStreak);
+    const newLongest = Math.max(userProfile.longestStreak || 0, newCurrentStreak);
+
+    const updated: UserProfile = {
       ...userProfile,
       totalExercisesCompleted: newCount,
       xp: newXp,
+      currentStreak: newCurrentStreak,
+      longestStreak: newLongest,
+      lastLoginDate: todayStr,
       updatedAt: new Date().toISOString(),
     };
 
@@ -305,35 +282,68 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const ref = doc(db, 'users', userProfile.uid);
         await updateDoc(ref, {
           totalExercisesCompleted: newCount,
+          xp: newXp,
+          currentStreak: newCurrentStreak,
+          longestStreak: newLongest,
+          lastLoginDate: todayStr,
           updatedAt: new Date().toISOString(),
         });
       } catch (err) {
         handleFirestoreError(err, OperationType.UPDATE, `users/${userProfile.uid}`);
       }
     } else {
-      localStorage.setItem('nahwulab_admin_session', JSON.stringify(updated));
+      localStorage.setItem('smartkib_admin_session', JSON.stringify(updated));
     }
   };
 
   const recordActivity = async (activityType: 'chat' | 'exercise' | 'library') => {
     if (!userProfile) return;
     const todayStr = getTodayDateString();
-    const newXp = (userProfile.xp || 50) + 5;
-    setUserProfile((prev) => (prev ? { ...prev, xp: newXp } : null));
+    const currentXp = typeof userProfile.xp === 'number' ? userProfile.xp : 0;
+    // Award XP based on learning activity
+    const pointsGained = activityType === 'exercise' ? 20 : activityType === 'library' ? 15 : 10;
+    const newXp = currentXp + pointsGained;
+
+    // Maintain streak on verified learning activity
+    const streakCalc = calculateStreak(userProfile.lastLoginDate, userProfile.currentStreak || 0, todayStr);
+    const newCurrentStreak = Math.max(1, streakCalc.newStreak);
+    const newLongest = Math.max(userProfile.longestStreak || 0, newCurrentStreak);
+
+    const updated: UserProfile = {
+      ...userProfile,
+      xp: newXp,
+      currentStreak: newCurrentStreak,
+      longestStreak: newLongest,
+      lastLoginDate: todayStr,
+      updatedAt: new Date().toISOString(),
+    };
+
+    setUserProfile(updated);
 
     if (currentUser) {
       try {
+        const ref = doc(db, 'users', userProfile.uid);
+        await updateDoc(ref, {
+          xp: newXp,
+          currentStreak: newCurrentStreak,
+          longestStreak: newLongest,
+          lastLoginDate: todayStr,
+          updatedAt: new Date().toISOString(),
+        });
+
         const logRef = doc(db, 'users', userProfile.uid, 'streakLogs', `${todayStr}_${activityType}`);
         await setDoc(logRef, {
           userId: userProfile.uid,
           date: todayStr,
           activityType,
-          points: 5,
+          points: pointsGained,
           timestamp: new Date().toISOString(),
         } as StreakLogItem);
       } catch (e) {
         console.warn('Log activity error:', e);
       }
+    } else {
+      localStorage.setItem('smartkib_admin_session', JSON.stringify(updated));
     }
   };
 

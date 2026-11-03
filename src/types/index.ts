@@ -46,6 +46,8 @@ export interface ExerciseItem {
   options: string[];
   correctAnswerIndex: number;
   explanation: string;
+  kitabReference?: string;
+  topicTag?: string;
   createdBy?: string;
 }
 
@@ -87,4 +89,5 @@ export interface SentenceAnalysisResult {
   translation: string;
   overallGrammar: string;
   words: WordAnalysis[];
+  kitabReference?: string;
 }

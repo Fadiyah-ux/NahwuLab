@@ -1,8 +1,26 @@
 @import "tailwindcss";
 
+@theme {
+  --color-brand-yellow: #FFC700;
+  --color-brand-butter: #FFF5B8;
+  --color-brand-cream: #FFFDF3;
+  --color-brand-light-yellow: #FFE885;
+  --color-brand-orange: #FF9F1C;
+  --color-brand-green: #00A878;
+  --color-brand-blue: #29B6F6;
+  --color-brand-pink: #EC4899;
+  --color-brand-light-pink: #FCE7F3;
+  --color-brand-purple: #8B5CF6;
+  --color-brand-light-purple: #F3E8FF;
+  --color-brand-text: #263238;
+  --color-brand-muted: #59636B;
+}
+
 @layer base {
   body {
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    color: #1e293b;
+    background-color: #F4FBF7;
   }
 }
 
@@ -10,18 +28,20 @@
   font-family: 'Amiri', 'Scheherazade New', serif;
 }
 
-/* Custom scrollbars for library & chat */
+/* Custom scrollbars with clean emerald theme */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
 }
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: #f1f5f9;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #10b981;
   border-radius: 9999px;
+  border: 1px solid #059669;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #059669;
 }
+
