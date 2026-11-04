@@ -32,10 +32,11 @@ const WELCOME_CONTENT = `Assalamu'alaikum!🙏🏻
 
 Mau berbincang soal Nahwu, Sharaf, atau bahasa Arab? Tanyakan apa saja, Musyrif siap menemani belajarmu! 📚`;
 
-const STORAGE_KEY_SENTENCE = 'nahwulab_tarkib_input';
-const STORAGE_KEY_ANALYZED_SENTENCE = 'nahwulab_tarkib_analyzed_sentence';
-const STORAGE_KEY_RESULT = 'nahwulab_tarkib_result';
-const STORAGE_KEY_SUBMODE = 'nahwulab_chat_submode';
+const STORAGE_KEY_MUSYRIF_DRAFT = 'smartkib_draft_musyrif_input';
+const STORAGE_KEY_SENTENCE = 'smartkib_draft_tarkib_input';
+const STORAGE_KEY_ANALYZED_SENTENCE = 'smartkib_tarkib_analyzed_sentence';
+const STORAGE_KEY_RESULT = 'smartkib_tarkib_result';
+const STORAGE_KEY_SUBMODE = 'smartkib_chat_submode';
 
 interface ChatSessionGroup {
   dateKey: string;
@@ -62,7 +63,13 @@ export const ChatTab: React.FC = () => {
   // selectedDateKey: null means today's active conversation
   const [selectedDateKey, setSelectedDateKey] = useState<string | null>(null);
 
-  const [inputMessage, setInputMessage] = useState('');
+  // Unsent draft input for Tanya Musyrif
+  const [inputMessage, setInputMessage] = useState<string>(() => {
+    try {
+      return sessionStorage.getItem(STORAGE_KEY_MUSYRIF_DRAFT) || '';
+    } catch {}
+    return '';
+  });
   const [selectedTopic, setSelectedTopic] = useState<'nahwu' | 'shorof' | 'irab' | 'umum'>('umum');
   const [isLoading, setIsLoading] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -232,7 +239,12 @@ export const ChatTab: React.FC = () => {
 
     const updatedWithUser = [...allMessages, userMsg];
     setAllMessages(updatedWithUser);
-    if (!customPrompt) setInputMessage('');
+    if (!customPrompt) {
+      setInputMessage('');
+      try {
+        sessionStorage.removeItem(STORAGE_KEY_MUSYRIF_DRAFT);
+      } catch {}
+    }
     setIsLoading(true);
 
     if (userProfile?.uid) {
@@ -354,6 +366,13 @@ export const ChatTab: React.FC = () => {
     }
   };
 
+  const handleInputChange = (val: string) => {
+    setInputMessage(val);
+    try {
+      sessionStorage.setItem(STORAGE_KEY_MUSYRIF_DRAFT, val);
+    } catch {}
+  };
+
   const copyToClipboard = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
     setCopiedId(id);
@@ -366,7 +385,7 @@ export const ChatTab: React.FC = () => {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gradient-to-br from-emerald-800 via-emerald-700 to-teal-900 border border-emerald-600/30 p-6 sm:p-7 rounded-3xl text-white shadow-lg shadow-emerald-950/15 mb-6">
         <div>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-white/15 backdrop-blur-md text-white border border-white/20 mb-2 shadow-2xs">
-            <span>✨ Laboratorium Nahwu &amp; Sharaf Interaktif</span>
+            <span>Laboratorium Nahwu &amp; Sharaf Interaktif</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
             Konsultasi &amp; Bedah I&apos;rab Digital
@@ -634,7 +653,7 @@ export const ChatTab: React.FC = () => {
                   <input
                     type="text"
                     value={inputMessage}
-                    onChange={(e) => setInputMessage(e.target.value)}
+                    onChange={(e) => handleInputChange(e.target.value)}
                     placeholder="Tanyakan persoalan Nahwu, Shorof, atau ketik kalimat Arab..."
                     className="flex-1 px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all font-medium"
                     disabled={isLoading}

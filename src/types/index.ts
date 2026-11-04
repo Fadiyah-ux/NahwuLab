@@ -1,5 +1,24 @@
 export type UserRole = 'admin' | 'student';
 
+export interface StreakRecoveryData {
+  inProgress: boolean;
+  missedDays: number;
+  previousStreak: number;
+  targetQuestions: number;
+  currentQuestionIndex: number;
+  solvedQuestionIds: string[];
+  usedQuestionIds: string[];
+  lastBreakDate?: string;
+}
+
+export interface StreakRecoveryLog {
+  id: string;
+  date: string;
+  missedDays: number;
+  restoredStreak: number;
+  timestamp: string;
+}
+
 export interface UserProfile {
   uid: string;
   email: string;
@@ -8,7 +27,12 @@ export interface UserProfile {
   role: UserRole;
   currentStreak: number;
   longestStreak: number;
-  lastLoginDate: string;
+  lastLoginDate?: string;
+  lastActiveDate?: string; // Tanggal aktivitas belajar terakhir dalam format YYYY-MM-DD WIB
+  streakStatus?: 'active' | 'broken' | 'recovered' | 'idle';
+  missedDays?: number;
+  streakRecovery?: StreakRecoveryData | null;
+  recoveryHistory?: StreakRecoveryLog[];
   totalExercisesCompleted: number;
   xp?: number;
   createdAt: string;

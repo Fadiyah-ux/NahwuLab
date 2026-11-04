@@ -43,6 +43,28 @@
           "description": "ISO date format YYYY-MM-DD of last activity",
           "maxLength": 20
         },
+        "lastActiveDate": {
+          "type": "string",
+          "description": "ISO date format YYYY-MM-DD of last qualifying learning activity",
+          "maxLength": 20
+        },
+        "streakStatus": {
+          "type": "string",
+          "description": "Current status of streak (active, broken, recovered, idle)",
+          "enum": ["active", "broken", "recovered", "idle"]
+        },
+        "missedDays": {
+          "type": "number",
+          "description": "Number of calendar days missed"
+        },
+        "streakRecovery": {
+          "type": "object",
+          "description": "Active streak recovery session and progress"
+        },
+        "recoveryHistory": {
+          "type": "array",
+          "description": "History of streak recovery accomplishments"
+        },
         "totalExercisesCompleted": {
           "type": "number",
           "description": "Total number of completed exercises"
@@ -58,7 +80,7 @@
           "maxLength": 64
         }
       },
-      "required": ["uid", "email", "displayName", "role", "currentStreak", "longestStreak", "lastLoginDate"]
+      "required": ["uid", "email", "displayName", "role", "currentStreak", "longestStreak"]
     },
     "StreakLog": {
       "title": "StreakLog",

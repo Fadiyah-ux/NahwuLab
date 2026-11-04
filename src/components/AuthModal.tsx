@@ -114,7 +114,7 @@ export const AuthModal: React.FC = () => {
           <div className="md:col-span-6 flex flex-col justify-between border-b md:border-b-0 md:border-r border-emerald-100/80 pb-6 md:pb-0 md:pr-8">
             <div>
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-emerald-50 text-emerald-800 border border-emerald-200 mb-4 shadow-2xs">
-                <span>⭐ Kurikulum Gramatika &amp; Kaidah Turats Pesantren</span>
+                <span>Kurikulum Gramatika &amp; Kaidah Turats Pesantren</span>
               </div>
               <h2 className="text-xl sm:text-2xl font-black text-slate-800 mb-2">
                 Kuasai Bahasa Arab dengan Menyenangkan &amp; Presisi

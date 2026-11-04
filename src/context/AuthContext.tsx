@@ -10,8 +10,12 @@ import {
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { auth, db, googleProvider, testFirestoreConnection } from '../firebase/config';
 import { handleFirestoreError, OperationType } from '../firebase/errorHandler';
-import { UserProfile, StreakLogItem } from '../types';
-import { calculateStreak, getTodayDateString } from '../utils/streak';
+import { UserProfile, StreakLogItem, StreakRecoveryData, StreakRecoveryLog } from '../types';
+import {
+  getJakartaDateString,
+  evaluateStreakStatus,
+  calculateActivityStreak,
+} from '../utils/streak';
 
 interface AuthContextType {
   currentUser: FirebaseUser | null;
@@ -26,6 +30,9 @@ interface AuthContextType {
   refreshUserProfile: () => Promise<void>;
   incrementExercisesCompleted: (xpGain?: number) => Promise<void>;
   recordActivity: (activityType: 'chat' | 'exercise' | 'library') => Promise<void>;
+  startStreakRecovery: () => Promise<void>;
+  saveRecoveryProgress: (data: Partial<StreakRecoveryData>) => Promise<void>;
+  completeStreakRecovery: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -37,16 +44,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  // Synchronize user profile and update streak
-  const syncUserStreakAndProfile = async (uid: string, email: string, displayName?: string | null, photoURL?: string | null) => {
+  // Synchronize user profile and evaluate streak state WITHOUT false increments
+  const syncUserStreakAndProfile = async (
+    uid: string,
+    email: string,
+    displayName?: string | null,
+    photoURL?: string | null
+  ) => {
     const userDocRef = doc(db, 'users', uid);
-    const todayStr = getTodayDateString();
+    const todayStr = getJakartaDateString();
 
     try {
       const snap = await getDoc(userDocRef);
       const isUserAdmin = email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
 
       if (!snap.exists()) {
+        // New user starts streak strictly from 0
         const newProfile: UserProfile = {
           uid,
           email,
@@ -56,6 +69,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           currentStreak: 0,
           longestStreak: 0,
           lastLoginDate: todayStr,
+          lastActiveDate: undefined,
+          streakStatus: 'idle',
+          missedDays: 0,
+          streakRecovery: null,
+          recoveryHistory: [],
           totalExercisesCompleted: 0,
           xp: 0,
           createdAt: new Date().toISOString(),
@@ -65,7 +83,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         await setDoc(userDocRef, newProfile);
         setUserProfile(newProfile);
 
-        // If admin, also ensure admins collection entry
         if (isUserAdmin) {
           try {
             await setDoc(doc(db, 'admins', uid), { uid, email });
@@ -77,21 +94,46 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const data = snap.data() as UserProfile;
         let updatedData = { ...data };
 
-        // Guarantee admin role if email matches
         if (isUserAdmin && updatedData.role !== 'admin') {
           updatedData.role = 'admin';
         }
-
-        // Ensure existing users without xp are not NaN
         if (typeof updatedData.xp !== 'number') {
           updatedData.xp = 0;
+        }
+
+        // Evaluate streak state (broken detection, missed days calculation)
+        const evaluated = evaluateStreakStatus(updatedData);
+        updatedData = {
+          ...updatedData,
+          currentStreak: evaluated.currentStreak,
+          longestStreak: evaluated.longestStreak,
+          streakStatus: evaluated.streakStatus,
+          missedDays: evaluated.missedDays,
+          streakRecovery: evaluated.streakRecovery ?? updatedData.streakRecovery ?? null,
+          lastLoginDate: todayStr,
+          updatedAt: new Date().toISOString(),
+        };
+
+        if (evaluated.needsUpdate) {
+          try {
+            await updateDoc(userDocRef, {
+              currentStreak: updatedData.currentStreak,
+              longestStreak: updatedData.longestStreak,
+              streakStatus: updatedData.streakStatus,
+              missedDays: updatedData.missedDays,
+              streakRecovery: updatedData.streakRecovery,
+              lastLoginDate: todayStr,
+              updatedAt: updatedData.updatedAt,
+            });
+          } catch (e) {
+            console.warn('Could not auto-update evaluated streak:', e);
+          }
         }
 
         setUserProfile(updatedData);
       }
     } catch (err) {
       console.error('Error syncing user profile:', err);
-      // In case Firestore permissions or network fails, provide a resilient memory profile
       const isUserAdmin = email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
       setUserProfile({
         uid,
@@ -102,6 +144,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         currentStreak: 0,
         longestStreak: 0,
         lastLoginDate: todayStr,
+        streakStatus: 'idle',
+        missedDays: 0,
         totalExercisesCompleted: 0,
         xp: 0,
         createdAt: new Date().toISOString(),
@@ -113,13 +157,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     testFirestoreConnection();
 
-    // Check for saved local admin session if Firebase Auth was offline or used custom demo credentials
+    // Check for saved local admin session
     const localSession = localStorage.getItem('smartkib_admin_session') || localStorage.getItem('nahwulab_admin_session');
     if (localSession) {
       try {
-        const parsed = JSON.parse(localSession);
+        const parsed: UserProfile = JSON.parse(localSession);
         if (parsed.email === ADMIN_EMAIL) {
-          setUserProfile(parsed);
+          const evaluated = evaluateStreakStatus(parsed);
+          const activeAdmin = {
+            ...parsed,
+            streakStatus: evaluated.streakStatus,
+            missedDays: evaluated.missedDays,
+            streakRecovery: evaluated.streakRecovery ?? parsed.streakRecovery ?? null,
+          };
+          setUserProfile(activeAdmin);
           setLoading(false);
           return;
         }
@@ -164,10 +215,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(true);
     const cleanEmail = email.trim().toLowerCase();
 
-    // Special check for user-requested admin credentials
+    // Special check for admin credentials
     if (cleanEmail === ADMIN_EMAIL.toLowerCase() && pass === 'Faza4321') {
       try {
-        // Attempt Firebase Auth sign-in first
         const cred = await signInWithEmailAndPassword(auth, cleanEmail, pass);
         if (cred.user) {
           await syncUserStreakAndProfile(cred.user.uid, cleanEmail, 'Ustadzah Izzah Fadiyah (Admin)');
@@ -175,8 +225,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return;
         }
       } catch (fbErr: any) {
-        console.warn('Firebase Email Auth unavailable or user not yet in Firebase Auth console, creating verified admin session:', fbErr?.code);
-        // Fallback: create persistent local admin profile
+        console.warn('Firebase Email Auth fallback for admin:', fbErr?.code);
         const adminProfile: UserProfile = {
           uid: 'admin_izzah_fadiyah_01',
           email: ADMIN_EMAIL,
@@ -184,13 +233,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           role: 'admin',
           currentStreak: 5,
           longestStreak: 12,
-          lastLoginDate: getTodayDateString(),
+          lastLoginDate: getJakartaDateString(),
+          lastActiveDate: getJakartaDateString(),
+          streakStatus: 'active',
+          missedDays: 0,
           totalExercisesCompleted: 8,
           xp: 450,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
-        localStorage.setItem('nahwulab_admin_session', JSON.stringify(adminProfile));
+        localStorage.setItem('smartkib_admin_session', JSON.stringify(adminProfile));
         setUserProfile(adminProfile);
         setLoading(false);
         return;
@@ -231,6 +283,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = async () => {
+    localStorage.removeItem('smartkib_admin_session');
     localStorage.removeItem('nahwulab_admin_session');
     try {
       await signOut(auth);
@@ -246,75 +299,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const snap = await getDoc(doc(db, 'users', userProfile.uid));
       if (snap.exists()) {
-        setUserProfile(snap.data() as UserProfile);
+        const data = snap.data() as UserProfile;
+        setUserProfile(data);
       }
     } catch (e) {
       console.warn('Could not refresh user profile:', e);
     }
   };
 
-  const incrementExercisesCompleted = async (xpGain: number = 20) => {
-    if (!userProfile) return;
-    const todayStr = getTodayDateString();
-    const newCount = (userProfile.totalExercisesCompleted || 0) + 1;
-    const currentXp = typeof userProfile.xp === 'number' ? userProfile.xp : 0;
-    const newXp = currentXp + xpGain;
-
-    // Calculate streak upon completing an exercise
-    const streakCalc = calculateStreak(userProfile.lastLoginDate, userProfile.currentStreak || 0, todayStr);
-    const newCurrentStreak = Math.max(1, streakCalc.newStreak);
-    const newLongest = Math.max(userProfile.longestStreak || 0, newCurrentStreak);
-
-    const updated: UserProfile = {
-      ...userProfile,
-      totalExercisesCompleted: newCount,
-      xp: newXp,
-      currentStreak: newCurrentStreak,
-      longestStreak: newLongest,
-      lastLoginDate: todayStr,
-      updatedAt: new Date().toISOString(),
-    };
-
-    setUserProfile(updated);
-
-    if (currentUser) {
-      try {
-        const ref = doc(db, 'users', userProfile.uid);
-        await updateDoc(ref, {
-          totalExercisesCompleted: newCount,
-          xp: newXp,
-          currentStreak: newCurrentStreak,
-          longestStreak: newLongest,
-          lastLoginDate: todayStr,
-          updatedAt: new Date().toISOString(),
-        });
-      } catch (err) {
-        handleFirestoreError(err, OperationType.UPDATE, `users/${userProfile.uid}`);
-      }
-    } else {
-      localStorage.setItem('smartkib_admin_session', JSON.stringify(updated));
-    }
-  };
-
+  /**
+   * Records a verified learning activity (exercise, chat/tarkib, or library).
+   * Calculates streaks accurately based on WIB calendar days.
+   */
   const recordActivity = async (activityType: 'chat' | 'exercise' | 'library') => {
     if (!userProfile) return;
-    const todayStr = getTodayDateString();
+    const todayStr = getJakartaDateString();
     const currentXp = typeof userProfile.xp === 'number' ? userProfile.xp : 0;
-    // Award XP based on learning activity
     const pointsGained = activityType === 'exercise' ? 20 : activityType === 'library' ? 15 : 10;
     const newXp = currentXp + pointsGained;
 
-    // Maintain streak on verified learning activity
-    const streakCalc = calculateStreak(userProfile.lastLoginDate, userProfile.currentStreak || 0, todayStr);
-    const newCurrentStreak = Math.max(1, streakCalc.newStreak);
-    const newLongest = Math.max(userProfile.longestStreak || 0, newCurrentStreak);
+    // Evaluate streak upon verified learning activity
+    const streakResult = calculateActivityStreak(userProfile);
 
     const updated: UserProfile = {
       ...userProfile,
       xp: newXp,
-      currentStreak: newCurrentStreak,
-      longestStreak: newLongest,
+      currentStreak: streakResult.newStreak,
+      longestStreak: streakResult.newLongest,
+      lastActiveDate: streakResult.newLastActiveDate,
       lastLoginDate: todayStr,
+      streakStatus: streakResult.streakStatus,
+      missedDays: streakResult.missedDays,
       updatedAt: new Date().toISOString(),
     };
 
@@ -325,9 +340,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const ref = doc(db, 'users', userProfile.uid);
         await updateDoc(ref, {
           xp: newXp,
-          currentStreak: newCurrentStreak,
-          longestStreak: newLongest,
+          currentStreak: streakResult.newStreak,
+          longestStreak: streakResult.newLongest,
+          lastActiveDate: streakResult.newLastActiveDate,
           lastLoginDate: todayStr,
+          streakStatus: streakResult.streakStatus,
+          missedDays: streakResult.missedDays,
           updatedAt: new Date().toISOString(),
         });
 
@@ -341,6 +359,184 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } as StreakLogItem);
       } catch (e) {
         console.warn('Log activity error:', e);
+      }
+    } else {
+      localStorage.setItem('smartkib_admin_session', JSON.stringify(updated));
+    }
+  };
+
+  const incrementExercisesCompleted = async (xpGain: number = 20) => {
+    if (!userProfile) return;
+    const todayStr = getJakartaDateString();
+    const newCount = (userProfile.totalExercisesCompleted || 0) + 1;
+    const currentXp = typeof userProfile.xp === 'number' ? userProfile.xp : 0;
+    const newXp = currentXp + xpGain;
+
+    const streakResult = calculateActivityStreak(userProfile);
+
+    const updated: UserProfile = {
+      ...userProfile,
+      totalExercisesCompleted: newCount,
+      xp: newXp,
+      currentStreak: streakResult.newStreak,
+      longestStreak: streakResult.newLongest,
+      lastActiveDate: streakResult.newLastActiveDate,
+      lastLoginDate: todayStr,
+      streakStatus: streakResult.streakStatus,
+      missedDays: streakResult.missedDays,
+      updatedAt: new Date().toISOString(),
+    };
+
+    setUserProfile(updated);
+
+    if (currentUser) {
+      try {
+        const ref = doc(db, 'users', userProfile.uid);
+        await updateDoc(ref, {
+          totalExercisesCompleted: newCount,
+          xp: newXp,
+          currentStreak: streakResult.newStreak,
+          longestStreak: streakResult.newLongest,
+          lastActiveDate: streakResult.newLastActiveDate,
+          lastLoginDate: todayStr,
+          streakStatus: streakResult.streakStatus,
+          missedDays: streakResult.missedDays,
+          updatedAt: new Date().toISOString(),
+        });
+      } catch (err) {
+        handleFirestoreError(err, OperationType.UPDATE, `users/${userProfile.uid}`);
+      }
+    } else {
+      localStorage.setItem('smartkib_admin_session', JSON.stringify(updated));
+    }
+  };
+
+  /**
+   * Initializes or resumes a streak recovery session.
+   */
+  const startStreakRecovery = async () => {
+    if (!userProfile) return;
+    const missed = userProfile.missedDays || 1;
+    const prev = userProfile.currentStreak > 0 ? userProfile.currentStreak : 1;
+
+    const recoveryData: StreakRecoveryData = userProfile.streakRecovery || {
+      inProgress: true,
+      missedDays: missed,
+      previousStreak: prev,
+      targetQuestions: missed,
+      currentQuestionIndex: 0,
+      solvedQuestionIds: [],
+      usedQuestionIds: [],
+      lastBreakDate: getJakartaDateString(),
+    };
+
+    recoveryData.inProgress = true;
+
+    const updated: UserProfile = {
+      ...userProfile,
+      streakRecovery: recoveryData,
+      updatedAt: new Date().toISOString(),
+    };
+
+    setUserProfile(updated);
+
+    if (currentUser) {
+      try {
+        await updateDoc(doc(db, 'users', userProfile.uid), {
+          streakRecovery: recoveryData,
+          updatedAt: updated.updatedAt,
+        });
+      } catch (e) {
+        console.warn('startStreakRecovery error:', e);
+      }
+    } else {
+      localStorage.setItem('smartkib_admin_session', JSON.stringify(updated));
+    }
+  };
+
+  /**
+   * Saves intermediate progress during streak recovery (e.g. after answering a question correctly).
+   */
+  const saveRecoveryProgress = async (partial: Partial<StreakRecoveryData>) => {
+    if (!userProfile || !userProfile.streakRecovery) return;
+    const updatedRecovery: StreakRecoveryData = {
+      ...userProfile.streakRecovery,
+      ...partial,
+    };
+
+    const updated: UserProfile = {
+      ...userProfile,
+      streakRecovery: updatedRecovery,
+      updatedAt: new Date().toISOString(),
+    };
+
+    setUserProfile(updated);
+
+    if (currentUser) {
+      try {
+        await updateDoc(doc(db, 'users', userProfile.uid), {
+          streakRecovery: updatedRecovery,
+          updatedAt: updated.updatedAt,
+        });
+      } catch (e) {
+        console.warn('saveRecoveryProgress error:', e);
+      }
+    } else {
+      localStorage.setItem('smartkib_admin_session', JSON.stringify(updated));
+    }
+  };
+
+  /**
+   * Finalizes successful streak recovery:
+   * - Restores previousStreak
+   * - Clears streakRecovery and missedDays
+   * - Logs to recoveryHistory
+   */
+  const completeStreakRecovery = async () => {
+    if (!userProfile || !userProfile.streakRecovery) return;
+    const todayStr = getJakartaDateString();
+    const restoredStreak = userProfile.streakRecovery.previousStreak || 1;
+    const missedDays = userProfile.streakRecovery.missedDays || 1;
+    const newlyUsed = userProfile.streakRecovery.solvedQuestionIds || [];
+
+    const historyEntry: StreakRecoveryLog = {
+      id: 'rec_' + Date.now(),
+      date: todayStr,
+      missedDays,
+      restoredStreak,
+      timestamp: new Date().toISOString(),
+    };
+
+    const updatedHistory = [...(userProfile.recoveryHistory || []), historyEntry];
+
+    const updated: UserProfile = {
+      ...userProfile,
+      currentStreak: restoredStreak,
+      longestStreak: Math.max(userProfile.longestStreak || 0, restoredStreak),
+      lastActiveDate: todayStr,
+      streakStatus: 'recovered',
+      missedDays: 0,
+      streakRecovery: null,
+      recoveryHistory: updatedHistory,
+      updatedAt: new Date().toISOString(),
+    };
+
+    setUserProfile(updated);
+
+    if (currentUser) {
+      try {
+        await updateDoc(doc(db, 'users', userProfile.uid), {
+          currentStreak: restoredStreak,
+          longestStreak: Math.max(userProfile.longestStreak || 0, restoredStreak),
+          lastActiveDate: todayStr,
+          streakStatus: 'recovered',
+          missedDays: 0,
+          streakRecovery: null,
+          recoveryHistory: updatedHistory,
+          updatedAt: updated.updatedAt,
+        });
+      } catch (e) {
+        console.warn('completeStreakRecovery error:', e);
       }
     } else {
       localStorage.setItem('smartkib_admin_session', JSON.stringify(updated));
@@ -368,6 +564,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         refreshUserProfile,
         incrementExercisesCompleted,
         recordActivity,
+        startStreakRecovery,
+        saveRecoveryProgress,
+        completeStreakRecovery,
       }}
     >
       {children}
