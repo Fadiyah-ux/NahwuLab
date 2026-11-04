@@ -363,27 +363,27 @@ export const ChatTab: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       {/* Top Banner / Mode Switcher */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white border border-emerald-100 p-6 sm:p-7 rounded-3xl text-slate-800 shadow-sm mb-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gradient-to-br from-emerald-800 via-emerald-700 to-teal-900 border border-emerald-600/30 p-6 sm:p-7 rounded-3xl text-white shadow-lg shadow-emerald-950/15 mb-6">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-emerald-50 text-emerald-800 border border-emerald-200 mb-2 shadow-2xs">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-white/15 backdrop-blur-md text-white border border-white/20 mb-2 shadow-2xs">
             <span>✨ Laboratorium Nahwu &amp; Sharaf Interaktif</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-800">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
             Konsultasi &amp; Bedah I&apos;rab Digital
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-xl font-medium">
+          <p className="text-xs sm:text-sm text-emerald-100/90 mt-1 max-w-xl font-medium">
             Tanyakan persoalan gramatika dan morfologi Arab atau bedah susunan tarkib kalimat secara otomatis kata demi kata.
           </p>
         </div>
 
         {/* Mode Toggle Buttons */}
-        <div className="flex items-center bg-slate-100/80 p-1.5 rounded-2xl border border-emerald-100/80 shrink-0">
+        <div className="flex items-center bg-black/20 backdrop-blur-md p-1.5 rounded-2xl border border-white/15 shrink-0">
           <button
             onClick={() => handleModeChange('chat')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
               mode === 'chat'
-                ? 'bg-emerald-600 text-white shadow-md shadow-emerald-700/20'
-                : 'text-slate-700 hover:text-emerald-700 hover:bg-white'
+                ? 'bg-white text-emerald-900 shadow-md'
+                : 'text-emerald-100 hover:text-white hover:bg-white/10'
             }`}
           >
             <MessageSquare className="w-4 h-4" />
@@ -391,10 +391,10 @@ export const ChatTab: React.FC = () => {
           </button>
           <button
             onClick={() => handleModeChange('breakdown')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
               mode === 'breakdown'
-                ? 'bg-emerald-700 text-white shadow-md shadow-emerald-800/20'
-                : 'text-slate-700 hover:text-emerald-700 hover:bg-white'
+                ? 'bg-white text-emerald-900 shadow-md'
+                : 'text-emerald-100 hover:text-white hover:bg-white/10'
             }`}
           >
             <Layers className="w-4 h-4" />

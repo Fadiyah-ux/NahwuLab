@@ -76,29 +76,29 @@ export const LibraryTab: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       {/* Top Header */}
-      <div className="bg-white border border-emerald-100 rounded-3xl p-6 sm:p-8 text-slate-800 shadow-sm mb-8">
+      <div className="bg-gradient-to-br from-emerald-800 via-emerald-700 to-teal-900 border border-emerald-600/30 rounded-3xl p-6 sm:p-8 text-white shadow-lg shadow-emerald-950/15 mb-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 mb-2 shadow-2xs">
-              <BookMarked className="w-3.5 h-3.5 text-emerald-600" />
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-white/15 backdrop-blur-md text-white border border-white/20 mb-2 shadow-2xs">
+              <BookMarked className="w-3.5 h-3.5 text-emerald-200" />
               <span>Khazanah 6 Kitab Turats Mu'tamad</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
               Pustaka Kitab SmartKib
             </h1>
-            <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-xl font-medium">
+            <p className="text-xs sm:text-sm text-emerald-100/90 mt-1 max-w-xl font-medium">
               Kajian komprehensif 6 kitab rujukan: Al-Ajurumiyyah, Nazham Imrithi, Mutammimah, Alfiyah Ibnu Malik, Amtsilah Tashrifiyah, dan Al-Maqshud berharakat lengkap dengan terjemah &amp; syarah kaidah.
             </p>
           </div>
 
           {/* Quick Stats Banner */}
-          <div className="flex items-center gap-3 bg-emerald-50/70 px-4 py-3 rounded-2xl border border-emerald-200 shrink-0 shadow-2xs">
-            <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold shadow-xs">
+          <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/20 shrink-0 shadow-sm">
+            <div className="w-10 h-10 rounded-xl bg-white/15 text-emerald-200 flex items-center justify-center font-bold shadow-xs">
               <BookOpen className="w-5 h-5" />
             </div>
             <div>
-              <span className="text-xs text-slate-500 font-medium block">Koleksi Kitab</span>
-              <span className="text-base font-bold text-slate-900">6 Kitab Pokok Santri</span>
+              <span className="text-xs text-emerald-200 font-medium block">Koleksi Kitab</span>
+              <span className="text-base font-bold text-white">6 Kitab Pokok Santri</span>
             </div>
           </div>
         </div>

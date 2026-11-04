@@ -36,19 +36,29 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
     });
   }
 
+  const isStreak = activeTab === 'streak';
+
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-emerald-100 shadow-xs">
+    <header
+      className={`sticky top-0 z-50 backdrop-blur-md transition-colors duration-300 shadow-md ${
+        isStreak
+          ? 'bg-gradient-to-r from-orange-600 via-amber-600 to-orange-700 text-white border-b border-orange-500/40 shadow-orange-950/20'
+          : 'bg-gradient-to-r from-emerald-800 via-emerald-700 to-teal-900 text-white border-b border-emerald-600/30 shadow-emerald-950/20'
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20">
           {/* Logo Brand SmartKib */}
           <SmartKibLogo
             size="md"
             clickable
+            inverted={true}
+            accentColor={isStreak ? 'amber' : 'emerald'}
             onClick={() => setActiveTab('chat')}
           />
 
           {/* Navigation Links (Desktop) */}
-          <nav className="hidden md:flex items-center gap-1.5 bg-slate-50 p-1.5 rounded-2xl border border-emerald-100/80">
+          <nav className="hidden md:flex items-center gap-1.5 bg-black/25 backdrop-blur-md p-1.5 rounded-2xl border border-white/20">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
@@ -58,15 +68,25 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
                   onClick={() => setActiveTab(item.id)}
                   className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
                     isActive
-                      ? 'bg-emerald-600 text-white shadow-md shadow-emerald-700/20 scale-[1.02]'
-                      : 'text-slate-700 hover:text-emerald-700 hover:bg-white'
+                      ? isStreak
+                        ? 'bg-white text-orange-950 shadow-md shadow-orange-950/20 scale-[1.02]'
+                        : 'bg-white text-emerald-950 shadow-md shadow-emerald-950/20 scale-[1.02]'
+                      : 'text-white/85 hover:text-white hover:bg-white/15'
                   }`}
                   aria-label={item.label}
                 >
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-emerald-600'}`} />
+                  <Icon
+                    className={`w-4 h-4 ${
+                      isActive
+                        ? isStreak
+                          ? 'text-orange-600'
+                          : 'text-emerald-700'
+                        : 'text-white'
+                    }`}
+                  />
                   <span>{item.label}</span>
                   {item.id === 'admin' && (
-                    <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+                    <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
                   )}
                 </button>
               );
@@ -78,28 +98,46 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
             {/* Streak Counter Pill */}
             <button
               onClick={() => setActiveTab('streak')}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-200 text-emerald-900 text-xs sm:text-sm font-extrabold shadow-2xs transition-all active:scale-95 cursor-pointer"
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border text-xs sm:text-sm font-extrabold shadow-sm transition-all active:scale-95 cursor-pointer ${
+                isStreak
+                  ? 'bg-white text-orange-950 border-white shadow-orange-900/20'
+                  : 'bg-white/15 hover:bg-white/25 border-white/25 text-white'
+              }`}
               title="Lama hari berturut-turut belajar"
               aria-label="Lihat streak belajar"
             >
-              <Flame className="w-4 h-4 text-amber-500 fill-amber-500 animate-pulse" />
+              <Flame
+                className={`w-4 h-4 ${
+                  isStreak
+                    ? 'text-orange-600 fill-orange-500'
+                    : 'text-amber-300 fill-amber-300'
+                } animate-pulse`}
+              />
               <span>{userProfile?.currentStreak ?? 0} Hari</span>
             </button>
 
             {/* Profile Dropdown / Info */}
-            <div className="flex items-center gap-2 pl-2 border-l border-emerald-100">
+            <div
+              className={`flex items-center gap-2 pl-2 border-l ${
+                isStreak ? 'border-orange-400/40' : 'border-emerald-500/40'
+              }`}
+            >
               <div className="text-right hidden lg:block">
                 <div className="flex items-center justify-end gap-1.5">
-                  <span className="text-xs font-bold text-slate-800 truncate max-w-[140px]">
+                  <span className="text-xs font-bold text-white truncate max-w-[140px]">
                     {userProfile?.displayName || 'Santri'}
                   </span>
                   {isAdmin && (
-                    <span className="px-1.5 py-0.5 rounded text-[10px] font-black bg-emerald-700 text-white shadow-2xs">
+                    <span className="px-1.5 py-0.5 rounded text-[10px] font-black bg-white/20 text-white border border-white/30 shadow-2xs">
                       ADMIN
                     </span>
                   )}
                 </div>
-                <span className="text-[11px] text-slate-500 truncate block max-w-[140px]">
+                <span
+                  className={`text-[11px] truncate block max-w-[140px] font-medium ${
+                    isStreak ? 'text-orange-100/90' : 'text-emerald-100/90'
+                  }`}
+                >
                   {userProfile?.email}
                 </span>
               </div>
@@ -108,10 +146,18 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
                 <img
                   src={userProfile.photoURL}
                   alt={userProfile.displayName}
-                  className="w-9 h-9 rounded-full ring-2 ring-emerald-200 object-cover shadow-xs"
+                  className={`w-9 h-9 rounded-full object-cover shadow-xs ring-2 ${
+                    isStreak ? 'ring-amber-300/80' : 'ring-emerald-300/80'
+                  }`}
                 />
               ) : (
-                <div className="w-9 h-9 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-sm shadow-xs">
+                <div
+                  className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm shadow-xs ${
+                    isStreak
+                      ? 'bg-white/20 text-white border border-white/30'
+                      : 'bg-white/20 text-white border border-white/30'
+                  }`}
+                >
                   {userProfile?.displayName?.charAt(0) || <User className="w-4 h-4" />}
                 </div>
               )}
@@ -119,7 +165,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
               {/* Logout Button */}
               <button
                 onClick={logout}
-                className="flex items-center gap-1 p-2 sm:px-3 sm:py-1.5 rounded-xl text-rose-600 hover:text-rose-700 hover:bg-rose-50 text-xs font-bold transition-all cursor-pointer"
+                className="flex items-center gap-1 p-2 sm:px-3 sm:py-1.5 rounded-xl text-white/85 hover:text-white hover:bg-white/15 text-xs font-bold transition-all cursor-pointer border border-transparent hover:border-white/20"
                 title="Keluar dari akun"
                 aria-label="Tombol Keluar / Logout"
               >
@@ -131,7 +177,11 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
         </div>
 
         {/* Mobile Nav Tabs */}
-        <div className="flex md:hidden overflow-x-auto py-2 gap-1.5 border-t border-emerald-100">
+        <div
+          className={`flex md:hidden overflow-x-auto py-2 gap-1.5 border-t ${
+            isStreak ? 'border-orange-500/40' : 'border-emerald-600/30'
+          }`}
+        >
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -141,8 +191,10 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
                 onClick={() => setActiveTab(item.id)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-colors ${
                   isActive
-                    ? 'bg-emerald-600 text-white shadow-xs'
-                    : 'text-slate-700 bg-white hover:bg-emerald-50 border border-slate-100'
+                    ? isStreak
+                      ? 'bg-white text-orange-950 shadow-xs'
+                      : 'bg-white text-emerald-950 shadow-xs'
+                    : 'text-white/85 bg-white/10 hover:bg-white/20 border border-white/15'
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />

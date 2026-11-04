@@ -71,30 +71,30 @@ export const StreakTab: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8 animate-fadeIn">
-      {/* Hero Streak Banner */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-emerald-800 via-emerald-700 to-teal-900 rounded-[2.5rem] p-6 sm:p-10 text-white shadow-xl shadow-emerald-950/20 border border-emerald-600/30">
+      {/* Hero Streak Banner (Oren) */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-orange-600 via-amber-600 to-orange-700 rounded-[2.5rem] p-6 sm:p-10 text-white shadow-xl shadow-orange-950/20 border border-orange-400/40">
         {/* Soft background glows */}
-        <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-emerald-400/10 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-16 -left-16 w-56 h-56 rounded-full bg-teal-400/10 blur-3xl pointer-events-none" />
+        <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-amber-300/20 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-16 -left-16 w-56 h-56 rounded-full bg-orange-400/20 blur-3xl pointer-events-none" />
         
         <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="text-center md:text-left flex flex-col items-center md:items-start">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold bg-white/15 backdrop-blur-md text-white mb-3 shadow-xs border border-white/20">
-              <Flame className="w-4 h-4 text-emerald-300 fill-emerald-300 animate-bounce" />
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold bg-white/20 backdrop-blur-md text-white mb-3 shadow-xs border border-white/30">
+              <Flame className="w-4 h-4 text-amber-200 fill-amber-200 animate-bounce" />
               <span>Rekor Keistiqamahan Belajar Santri</span>
             </div>
             <h1 className="text-4xl sm:text-5xl font-bold tracking-tight flex items-center justify-center md:justify-start gap-3">
               <span className="text-white drop-shadow-xs">{currentStreak} Hari</span>
-              <span className="text-emerald-200 text-3xl sm:text-4xl font-serif">مُوَاظَبَةٌ</span>
+              <span className="text-amber-200 text-3xl sm:text-4xl font-serif">مُوَاظَبَةٌ</span>
             </h1>
-            <p className="text-sm sm:text-base text-emerald-100/90 font-medium mt-2 max-w-lg leading-relaxed">
+            <p className="text-sm sm:text-base text-orange-50/95 font-medium mt-2 max-w-lg leading-relaxed">
               "أَحَبُّ الْأَعْمَالِ إِلَى اللهِ أَدْوَمُهَا وَإِنْ قَلَّ" — Amalan yang paling dicintai Allah adalah yang paling konsisten meski sedikit.
             </p>
           </div>
 
           {/* Quick Metrics Badge with Golden Dome Logo */}
-          <div className="flex items-center gap-4 bg-white/10 backdrop-blur-md p-4 sm:p-5 rounded-3xl border border-white/20 shadow-lg shrink-0">
-            <div className="w-14 h-14 rounded-2xl bg-white/10 p-1.5 flex items-center justify-center border border-white/20 shrink-0">
+          <div className="flex items-center gap-4 bg-black/15 backdrop-blur-md p-4 sm:p-5 rounded-3xl border border-white/25 shadow-lg shrink-0">
+            <div className="w-14 h-14 rounded-2xl bg-white/15 p-1.5 flex items-center justify-center border border-white/20 shrink-0">
               <img
                 src="/assets/aistudio/logo-removebg-preview_62f4cdfa.png"
                 alt="SmartKib Dome"
@@ -102,12 +102,12 @@ export const StreakTab: React.FC = () => {
               />
             </div>
             <div className="text-center px-3 border-r border-white/20">
-              <span className="text-xs text-emerald-200 font-medium block">Streak Tertinggi</span>
+              <span className="text-xs text-amber-100 font-medium block">Streak Tertinggi</span>
               <span className="text-2xl font-bold text-white">{longestStreak} Hari</span>
             </div>
             <div className="text-center px-3">
-              <span className="text-xs text-emerald-200 font-medium block">Total Pengalaman</span>
-              <span className="text-2xl font-bold text-emerald-300">{xp} XP</span>
+              <span className="text-xs text-amber-100 font-medium block">Total Pengalaman</span>
+              <span className="text-2xl font-bold text-amber-200">{xp} XP</span>
             </div>
           </div>
         </div>

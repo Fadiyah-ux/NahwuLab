@@ -5,6 +5,8 @@ interface SmartKibLogoProps {
   showTagline?: boolean;
   clickable?: boolean;
   variant?: 'badge' | 'pure';
+  inverted?: boolean;
+  accentColor?: 'emerald' | 'amber';
   onClick?: () => void;
 }
 
@@ -13,6 +15,8 @@ export const SmartKibLogo: React.FC<SmartKibLogoProps> = ({
   showTagline = true,
   clickable = false,
   variant = 'badge',
+  inverted = false,
+  accentColor = 'emerald',
   onClick,
 }) => {
   const sizeMap = {
@@ -54,7 +58,11 @@ export const SmartKibLogo: React.FC<SmartKibLogoProps> = ({
       {/* Logo Graphic from user's uploaded image */}
       {variant === 'badge' ? (
         <div
-          className={`${current.box} bg-gradient-to-br from-emerald-700 via-emerald-800 to-teal-900 border-2 border-emerald-500/40 flex items-center justify-center shadow-md shadow-emerald-900/20 relative transition-transform ${
+          className={`${current.box} ${
+            inverted
+              ? 'bg-white/15 border-2 border-white/30 shadow-md shadow-black/20'
+              : 'bg-gradient-to-br from-emerald-700 via-emerald-800 to-teal-900 border-2 border-emerald-500/40 shadow-md shadow-emerald-900/20'
+          } flex items-center justify-center relative transition-transform ${
             clickable ? 'group-hover:scale-105' : ''
           }`}
         >
@@ -76,12 +84,30 @@ export const SmartKibLogo: React.FC<SmartKibLogoProps> = ({
 
       {/* Brand Text */}
       <div>
-        <div className={`font-black tracking-tight ${current.title} text-slate-800 flex items-center leading-none`}>
+        <div
+          className={`font-black tracking-tight ${current.title} flex items-center leading-none ${
+            inverted ? 'text-white' : 'text-slate-800'
+          }`}
+        >
           <span>Smart</span>
-          <span className="text-emerald-600">Kib</span>
+          <span
+            className={
+              inverted
+                ? accentColor === 'amber'
+                  ? 'text-amber-300'
+                  : 'text-emerald-300'
+                : 'text-emerald-600'
+            }
+          >
+            Kib
+          </span>
         </div>
         {showTagline && (
-          <p className={`${current.tagline} text-slate-500 font-semibold mt-1`}>
+          <p
+            className={`${current.tagline} font-semibold mt-1 ${
+              inverted ? 'text-white/80' : 'text-slate-500'
+            }`}
+          >
             Kajian Nahwu, Sharaf &amp; I&apos;rab Interaktif
           </p>
         )}
