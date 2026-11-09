@@ -12,21 +12,23 @@ const getApiKey = () => {
 };
 
 const SMARTKIB_SYSTEM_INSTRUCTION = `Kamu adalah 'Tanya Musyrif SmartKib' — Asisten Ahli Pembelajaran Bahasa Arab di aplikasi SmartKib.
-Keahlian utamamu berakar kuat pada tradisi turats pesantren dan keilmuan bahasa Arab mu'tamad:
-1. Ilmu Nahwu (sintaksis, struktur kalimat, i'rab, dan tarkib).
-2. Ilmu Sharaf (morfologi, tashrif kata, wazan, dan i'lal).
-3. Pembelajaran bahasa Arab umum (kosakata, makna, faedah lughawiyyah).
+Keahlianmu berakar kuat pada tradisi turats pesantren mu'tamad dengan dua sumber rujukan primer:
 
-SUMBER RUJUKAN UTAMA (WAJIB BERPEDOMAN PADA KITAB BERIKUT):
-Kitab Nahwu:
-1. متن الآجرومية — Al-Ajurumiyyah / Jurumiyah (Ibnu Ajurrum)
-2. نظم العمريطي — Nazham Imrithi (Syaikh Syarafuddin Yahya Al-Imrithi)
-3. متممة الآجرومية — Mutammimah Al-Ajurumiyyah (Al-Hatthab Ar-Ra'ini)
-4. ألفية ابن مالك — Alfiyah Ibnu Malik (Ibnu Malik Al-Andalusi)
+SUMBER RUJUKAN UTAMA (WAJIB BERPEDOMAN HANYA PADA DUA KITAB BERIKUT):
+1. KITAB NAHWU (SINTAKSIS & I'RAB):
+   متممة الآجرومية — Muthammimah al-Jurumiyah karya Al-Imam Syaikh Syamsuddin Muhammad bin Muhammad Ar-Ra'ini (Al-Haththab Al-Maliki).
+   Seluruh pembahasan ilmu nahwu, struktur kalimat, i'rab, marfu'at, manshubat, makhfudhat, amil nawasikh, dan kaidah sintaksis WAJIB berpedoman pada kitab ini.
 
-Kitab Sharaf:
-1. الأمثلة التصريفية — Amtsilah Tashrifiyah (K.H. Muhammad Ma'shum bin Ali)
-2. المقصود — Al-Maqshud fi Ash-Sharf (Dinisbatkan kepada Al-Imam Abu Hanifah)
+2. KITAB SHOROF (MORFOLOGI & TASHRIF):
+   الأمثلة التصريفية — Amtsilah Tasrifiyah karya K.H. Muhammad Ma'shum bin Ali (Pesantren Seblak, Jombang).
+   Seluruh pembahasan ilmu shorof, wazan fi'il tsulatsi mujarrad (6 bab), tsulatsi mazid, ruba'i, mulhaq, tashrif istilahi, tashrif lughawi 14 dhamir, pembagian 7 bina', serta kaidah i'lal dan idgham WAJIB berpedoman pada kitab ini.
+
+KETENTUAN KETAT RUJUKAN:
+- SmartKib HANYA menggunakan dua kitab tersebut sebagai sumber rujukan utama.
+- JANGAN menggunakan kitab lain (seperti Al-Ajurumiyyah, Nazham Imrithi, Alfiyah Ibnu Malik, atau Al-Maqshud) sebagai referensi maupun sumber materi.
+- Jawaban AI harus mengutamakan penjelasan berdasarkan kedua kitab tersebut.
+- Cantumkan nama kitab dan bab yang menjadi rujukan apabila tersedia (contoh: "Kitab Muthammimah al-Jurumiyah, Bab الفاعل" atau "Kitab Amtsilah Tasrifiyah, Bab الثلاثي المجرد - الباب الأول").
+- JANGAN mengarang isi kitab atau mengklaim suatu pembahasan berasal dari kitab jika tidak ditemukan dalam sumber aslinya.
 
 ATURAN FORMAT PENULISAN & TAMPILAN:
 1. PENULISAN BAHASA ARAB MURNI:
@@ -47,17 +49,14 @@ ATURAN FORMAT PENULISAN & TAMPILAN:
    - Hindari emoji yang berlebihan.
 
 3. RUJUKAN KITAB DI AKHIR JAWABAN:
-   - Setiap jawaban yang menguraikan kaidah Nahwu atau Sharaf WAJIB menyertakan sumber rujukan ringkas di bagian akhir jawaban.
-   - Format standar:
+   - Setiap jawaban yang menguraikan kaidah Nahwu atau Sharaf WAJIB menyertakan sumber rujukan ringkas di bagian akhir jawaban:
      Rujukan:
-     Kitab Al-Ajurumiyyah, Bab المبتدأ والخبر.
-     (atau Kitab Alfiyah Ibnu Malik, pembahasan الفاعل; atau Kitab Amtsilah Tashrifiyah, Bab أَبْوَابُ الثُّلَاثِيِّ الْمُجَرَّدِ).
-   - Jangan mengarang nomor bait, nomor halaman, atau judul bab palsu yang tidak dapat diverifikasi.
+     Kitab Muthammimah al-Jurumiyah, Bab المبتدأ والخبر.
+     (atau Kitab Amtsilah Tasrifiyah, Bab أَبْوَابُ الثُّلَاثِيِّ الْمُجَرَّدِ).
    - Pertanyaan umum yang tidak bersentuhan dengan kaidah gramatika tidak perlu dipaksakan diberi rujukan.
 
 4. PRINSIP RESPON CEPAT & TEPAT SASARAN:
-   - Tanggapi langsung inti pertanyaan pengguna. Jika pengguna hanya meminta contoh kalimat, berikan contoh Arab berharakat beserta artinya secara ringkas tanpa uraian teori panjang yang tidak diminta.
-   - Jika pengguna meminta analisis kalimat tetapi belum menyertakan kalimatnya, mintalah dengan santun agar pengguna mengetikkan kalimat yang ingin dibedah.`;
+   - Tanggapi langsung inti pertanyaan pengguna secara santun, jelas, dan komunikatif.`;
 
 app.get('/api/health', (_req: Request, res: Response) => {
   res.json({
@@ -102,7 +101,7 @@ app.post('/api/chat', async (req: Request, res: Response) => {
 
     let userPromptWithContext = message;
     if (topic && topic !== 'umum') {
-      userPromptWithContext = `[Fokus Pembahasan: ${topic} - jawab langsung sesuai instruksi]\n${message}`;
+      userPromptWithContext = `[Fokus Pembahasan: ${topic} - rujuk Muthammimah al-Jurumiyah untuk Nahwu atau Amtsilah Tasrifiyah untuk Shorof]\n${message}`;
     }
 
     contents.push({
@@ -158,7 +157,7 @@ app.post('/api/analyze-sentence', async (req: Request, res: Response) => {
     }
 
     const ai = new GoogleGenAI({ apiKey });
-    const prompt = `Analisis kalimat bahasa Arab berikut kata demi kata secara mendalam untuk susunan sintaksis (Tarkib & I'rab) dan morfologi (Shorof) berdasarkan kaidah mu'tamad (Al-Ajurumiyyah, Imrithi, Alfiyah Ibnu Malik, dan Amtsilah Tashrifiyah).
+    const prompt = `Analisis kalimat bahasa Arab berikut kata demi kata secara mendalam untuk susunan sintaksis (Tarkib & I'rab) dan morfologi (Shorof) berdasarkan dua kitab rujukan utama SmartKib: Kitab Muthammimah al-Jurumiyah untuk kaidah Nahwu dan Kitab Amtsilah Tasrifiyah untuk kaidah Shorof.
 Kalimat yang WAJIB dianalisis adalah persis seperti yang diberikan berikut:
 "${cleanSentence}"
 
@@ -173,9 +172,9 @@ ATURAN ANALISIS KETAT:
    - "position": kedudukan tarkib (Fa'il, Maf'ul Bih, Mubtada', Khabar, Mudhaf Ilaih, Majrur bil Harf, Na'at, dll)
    - "irabCase": status i'rab ("Marfu'", "Manshub", "Majrur", "Majzum", atau "Mabni")
    - "marker": tanda I'rab (Dhommah Zhahirah, Fathah Zhahirah, Kasrah Zhahirah, Wawu, Alif, Sukun, dll)
-   - "morphology": wazan/sighah sharaf (misal: "Wazan فَعَلَ (Fi'il Tsulatsi Mujarrad)", "Isim Fa'il", "Jamak Taksir", dll)
+   - "morphology": wazan/sighah sharaf berdasarkan pola Amtsilah Tasrifiyah (misal: "Wazan فَعَلَ يَفْعُلُ (Fi'il Tsulatsi Mujarrad Bab 1)", "Isim Fa'il", "Jamak Taksir", dll)
    - "explanation": penjelasan kaidah mengapa kata tersebut memiliki kedudukan dan i'rab demikian
-6. Sertakan sumber rujukan kitab yang mendasari analisis ini pada key "kitabReference" (misal: "Kitab Al-Ajurumiyyah, Bab مَرْفُوعَاتِ الْأَسْمَاءِ (الْفَاعِلُ)").
+6. Sertakan sumber rujukan kitab yang mendasari analisis ini pada key "kitabReference" (misal: "Kitab Muthammimah al-Jurumiyah, Bab الفاعل" atau "Kitab Amtsilah Tasrifiyah, Bab ..."). HANYA gunakan Muthammimah al-Jurumiyah untuk Nahwu dan Amtsilah Tasrifiyah untuk Shorof.
 
 Balas HANYA dalam format JSON valid berikut:
 {
@@ -193,7 +192,7 @@ Balas HANYA dalam format JSON valid berikut:
       "explanation": "Penjelasan kaidah"
     }
   ],
-  "kitabReference": "Kitab Al-Ajurumiyyah, Bab ..."
+  "kitabReference": "Kitab Muthammimah al-Jurumiyah, Bab ..."
 }`;
 
     let response;
@@ -232,7 +231,6 @@ Balas HANYA dalam format JSON valid berikut:
 });
 
 function cleanFormatting(text: string): string {
-  // Remove markdown headers and excessive asterisks while preserving readability
   return text
     .replace(/^###+\s+/gm, '')
     .replace(/\*\*(.*?)\*\*/g, '$1')
@@ -253,7 +251,7 @@ Arti: Siswa itu telah menulis pelajaran.
 Keterangan: Lafadz الطَّالِبُ berkedudukan sebagai Fa'il yang berstatus Marfu' dengan tanda Dhommah zhahirah karena berupa isim mufrad.
 
 Rujukan:
-Kitab Al-Ajurumiyyah, Bab مَرْفُوعَاتِ الْأَسْمَاءِ (فَصْلُ الْفَاعِلِ).`;
+Kitab Muthammimah al-Jurumiyah, Bab الْفَاعِلِ.`;
     }
 
     if (q.includes('mubtada') || q.includes('khabar')) {
@@ -264,7 +262,7 @@ Arti: Zaid adalah orang yang berilmu.
 Keterangan: زَيْدٌ adalah Mubtada' marfu' dengan dhommah, dan عَالِمٌ adalah Khabar marfu' dengan dhommah yang menyempurnakan makna kalimat.
 
 Rujukan:
-Kitab Al-Ajurumiyyah & Nazham Imrithi, Bab الْمُبْتَدَأُ وَالْخَبَرُ.`;
+Kitab Muthammimah al-Jurumiyah, Bab الْمُبْتَدَأِ وَالْخَبَرِ.`;
     }
 
     if (q.includes('maf\'ul') || q.includes('maful')) {
@@ -275,7 +273,7 @@ Arti: Muhammad telah membaca Al-Qur'an.
 Keterangan: Lafadz الْقُرْآنَ adalah Maf'ul Bih yang berstatus Manshub dengan tanda Fathah zhahirah.
 
 Rujukan:
-Kitab Al-Ajurumiyyah, Bab مَنْصُوبَاتِ الْأَسْمَاءِ (الْمَفْعُولُ بِهِ).`;
+Kitab Muthammimah al-Jurumiyah, Bab الْمَفْعُولِ بِهِ.`;
     }
 
     if (q.includes('inna') || q.includes('kaana') || q.includes('kana')) {
@@ -290,7 +288,7 @@ Arti: Adalah Zaid itu seorang yang berilmu.
 Arti: Sesungguhnya Zaid adalah orang yang berilmu.
 
 Rujukan:
-Kitab Al-Ajurumiyyah & Nazham Imrithi, Bab كَانَ وَأَخَوَاتُهَا وَإِنَّ وَأَخَوَاتُهَا.`;
+Kitab Muthammimah al-Jurumiyah, Bab الْعَوَامِلِ الدَّاخِلَةِ عَلَى الْمُبْتَدَأِ وَالْخَبَرِ.`;
     }
   }
 
@@ -310,7 +308,7 @@ Kitab Al-Ajurumiyyah & Nazham Imrithi, Bab كَانَ وَأَخَوَاتُهَ
 - Contoh: كُتِبَ الدَّرْسُ (Pelajaran itu ditulis), kata الدَّرْسُ adalah Na'ibul Fa'il marfu'.
 
 Rujukan:
-Kitab Al-Ajurumiyyah & Alfiyah Ibnu Malik, Bab الْفَاعِلُ وَنَائِبُ الْفَاعِلِ.`;
+Kitab Muthammimah al-Jurumiyah, Bab الْفَاعِلِ dan Bab الْمَفْعُولِ الَّذِي لَمْ يُسَمَّ فَاعِلُهُ.`;
     }
   }
 
@@ -320,18 +318,18 @@ Kitab Al-Ajurumiyyah & Alfiyah Ibnu Malik, Bab الْفَاعِلُ وَنَائ
       return `Ilmu Nahwu (عِلْمُ النَّحْوِ):
 Kaidah-kaidah untuk mengetahui harakat dan keadaan akhir setiap kata bahasa Arab ketika tersusun dalam kalimat (I'rab dan Bina'), serta susunan tarkib yang benar.
 
-Tujuannya adalah memelihara lisan dari kesalahan gramatika dan memahami Al-Qur'an serta Sunnah secara tepat.
+Tujuannya adalah memelihara lisan dari kesalahan gramatika dan memahami Al-Qur'an serta Hadits secara tepat.
 
 Rujukan:
-Kitab Al-Ajurumiyyah & Nazham Imrithi, Bab بَابُ الْكَلَامِ.`;
+Kitab Muthammimah al-Jurumiyah, Bab الْكَلَامِ وَمَا يَتَأَلَّفُ مِنْهُ.`;
     }
 
     if (q.includes('shorof') || q.includes('sharaf')) {
       return `Ilmu Sharaf (عِلْمُ الصَّرْفِ):
-Ilmu yang mempelajari perubahan bentuk asal suatu kata menjadi aneka bentuk turunan (tashrif) untuk melahirkan makna-makna yang dikehendaki, serta mengenali huruf asli, huruf tambahan, dan kaidah i'lal.
+Ilmu yang mempelajari perubahan bentuk asal suatu kata menjadi aneka bentuk turunan (tashrif istilahi dan lughawi) guna melahirkan makna-makna yang dikehendaki, mengenali wazan, 7 bina', dan kaidah i'lal.
 
 Rujukan:
-Kitab Al-Maqshud fi Ash-Sharf, Bab حَقِيقَةُ عِلْمِ التَّصْرِيفِ.`;
+Kitab Amtsilah Tasrifiyah, Bab صِيَغُ التَّصْرِيفِ وَأَبْوَابُ الثُّلَاثِيِّ الْمُجَرَّدِ.`;
     }
 
     if (q.includes('irab') || q.includes("i'rab")) {
@@ -345,22 +343,22 @@ Pembagian I'rab ada 4 macam:
 4. Jazm (جَزْمٌ)
 
 Rujukan:
-Kitab Al-Ajurumiyyah, Bab بَابُ الْإِعْرَابِ.`;
+Kitab Muthammimah al-Jurumiyah, Bab الْإِعْرَابِ وَالْبِنَاءِ.`;
     }
   }
 
   // Respon umum
   return `Terima kasih atas pertanyaannya mengenai: "${message}".
 
-Dalam kaidah gramatika bahasa Arab, pembahasan ini ditinjau dari:
+Dalam kaidah gramatika bahasa Arab berbasis Muthammimah al-Jurumiyah dan Amtsilah Tasrifiyah, pembahasan ini ditinjau dari:
 1. Jenis kata yang digunakan (Isim, Fi'il, atau Harf).
 2. Kedudukan kata dalam susunan kalimat (Tarkib).
-3. Status dan tanda akhir kata (I'rab).
+3. Status dan tanda akhir kata (I'rab) serta wazan morfologinya (Shorof).
 
 Jika Anda membutuhkan contoh kalimat berharakat, perbandingan kaidah, atau analisis kata per kata, silakan beritahu saya apa yang ingin Anda bahas lebih lanjut.
 
 Rujukan:
-Kitab Al-Ajurumiyyah, Bab الْكَلَامِ وَالْإِعْرَابِ.`;
+Kitab Muthammimah al-Jurumiyah & Kitab Amtsilah Tasrifiyah.`;
 }
 
 function generateLocalAnalysisPayload(sentence: string) {
@@ -376,10 +374,10 @@ function generateLocalAnalysisPayload(sentence: string) {
       position: idx === 0 ? "Fi'il Pokok" : idx === 1 ? "Fa'il (Pelaku)" : "Maf'ul Bih / Keterangan",
       irabCase: idx === 0 ? "Mabni" : idx === 1 ? "Marfu'" : "Manshub",
       marker: idx === 0 ? "Mabni 'alal Fath" : idx === 1 ? "Dhommah Zhahirah" : "Fathah Zhahirah",
-      morphology: idx === 0 ? "Wazan فَعَلَ" : "Isim Mufrad",
-      explanation: idx === 0 ? "Kata kerja pokok kalimat" : idx === 1 ? "Pelaku perbuatan (Fa'il) berstatus marfu'" : "Objek kalimat (Maf'ul bih) berstatus manshub"
+      morphology: idx === 0 ? "Wazan فَعَلَ (Amtsilah Tasrifiyah)" : "Isim Mufrad",
+      explanation: idx === 0 ? "Kata kerja pokok kalimat" : idx === 1 ? "Pelaku perbuatan (Fa'il) berstatus marfu' menurut Muthammimah" : "Objek kalimat (Maf'ul bih) berstatus manshub menurut Muthammimah"
     })),
-    kitabReference: 'Kitab Al-Ajurumiyyah, Bab مَرْفُوعَاتِ الْأَسْمَاءِ (الْفَاعِلُ) وَمَنْصُوبَاتِ الْأَسْمَاءِ (الْمَفْعُولُ بِهِ).'
+    kitabReference: 'Kitab Muthammimah al-Jurumiyah, Bab الفاعل dan Bab المفعول به.'
   };
 }
 

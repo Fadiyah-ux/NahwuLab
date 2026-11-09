@@ -6,7 +6,7 @@ interface SmartKibLogoProps {
   clickable?: boolean;
   variant?: 'badge' | 'pure';
   inverted?: boolean;
-  accentColor?: 'emerald' | 'amber';
+  accentColor?: 'pink' | 'yellow' | 'orange' | 'cyan';
   onClick?: () => void;
 }
 
@@ -16,7 +16,7 @@ export const SmartKibLogo: React.FC<SmartKibLogoProps> = ({
   clickable = false,
   variant = 'badge',
   inverted = false,
-  accentColor = 'emerald',
+  accentColor = 'pink',
   onClick,
 }) => {
   const sizeMap = {
@@ -48,6 +48,19 @@ export const SmartKibLogo: React.FC<SmartKibLogoProps> = ({
 
   const current = sizeMap[size];
 
+  const getAccentClass = () => {
+    if (inverted) {
+      if (accentColor === 'yellow') return 'text-[#FFD233]';
+      if (accentColor === 'orange') return 'text-[#FF6B00]';
+      if (accentColor === 'cyan') return 'text-[#00D2FF]';
+      return 'text-[#FF2D78]';
+    }
+    if (accentColor === 'yellow') return 'text-[#EAB308]';
+    if (accentColor === 'orange') return 'text-[#FF6B00]';
+    if (accentColor === 'cyan') return 'text-[#00D2FF]';
+    return 'text-[#FF2D78]';
+  };
+
   return (
     <div
       onClick={clickable ? onClick : undefined}
@@ -55,13 +68,13 @@ export const SmartKibLogo: React.FC<SmartKibLogoProps> = ({
         clickable ? 'cursor-pointer group' : ''
       }`}
     >
-      {/* Logo Graphic from user's uploaded image */}
+      {/* Logo Graphic from user's uploaded image with Bubble Bash rounded badge */}
       {variant === 'badge' ? (
         <div
           className={`${current.box} ${
             inverted
               ? 'bg-white/15 border-2 border-white/30 shadow-md shadow-black/20'
-              : 'bg-gradient-to-br from-emerald-700 via-emerald-800 to-teal-900 border-2 border-emerald-500/40 shadow-md shadow-emerald-900/20'
+              : 'bg-gradient-to-br from-[#0C122C] to-[#1E1B4B] border-2 border-[#FFD233] shadow-md shadow-[#0C122C]/20'
           } flex items-center justify-center relative transition-transform ${
             clickable ? 'group-hover:scale-105' : ''
           }`}
@@ -86,19 +99,11 @@ export const SmartKibLogo: React.FC<SmartKibLogoProps> = ({
       <div>
         <div
           className={`font-black tracking-tight ${current.title} flex items-center leading-none ${
-            inverted ? 'text-white' : 'text-slate-800'
+            inverted ? 'text-white' : 'text-[#0C122C]'
           }`}
         >
           <span>Smart</span>
-          <span
-            className={
-              inverted
-                ? accentColor === 'amber'
-                  ? 'text-amber-300'
-                  : 'text-emerald-300'
-                : 'text-emerald-600'
-            }
-          >
+          <span className={getAccentClass()}>
             Kib
           </span>
         </div>

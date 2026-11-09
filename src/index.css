@@ -1,26 +1,26 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand-yellow: #FFC700;
-  --color-brand-butter: #FFF5B8;
-  --color-brand-cream: #FFFDF3;
-  --color-brand-light-yellow: #FFE885;
-  --color-brand-orange: #FF9F1C;
-  --color-brand-green: #00A878;
-  --color-brand-blue: #29B6F6;
-  --color-brand-pink: #EC4899;
-  --color-brand-light-pink: #FCE7F3;
-  --color-brand-purple: #8B5CF6;
-  --color-brand-light-purple: #F3E8FF;
-  --color-brand-text: #263238;
-  --color-brand-muted: #59636B;
+  --color-bubble-navy: #0C122C;
+  --color-bubble-deep: #161F46;
+  --color-bubble-pink: #FF2D78;
+  --color-bubble-light-pink: #FFE5EE;
+  --color-bubble-yellow: #FFD233;
+  --color-bubble-light-yellow: #FFF9D2;
+  --color-bubble-orange: #FF6B00;
+  --color-bubble-light-orange: #FFE8D6;
+  --color-bubble-cyan: #00D2FF;
+  --color-bubble-light-cyan: #E0F9FF;
+  --color-bubble-cream: #FFFDF5;
+  --color-bubble-purple: #7C3AED;
+  --color-bubble-light-purple: #F3E8FF;
 }
 
 @layer base {
   body {
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-    color: #1e293b;
-    background-color: #F4FBF7;
+    color: #0C122C;
+    background-color: #FFFDF5;
   }
 }
 
@@ -28,20 +28,22 @@
   font-family: 'Amiri', 'Scheherazade New', serif;
 }
 
-/* Custom scrollbars with clean emerald theme */
+/* Custom scrollbars with Bubble Bash Hot Pink & Navy accent */
 ::-webkit-scrollbar {
   width: 7px;
   height: 7px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #FFFDF5;
 }
 ::-webkit-scrollbar-thumb {
-  background: #10b981;
+  background: #FF2D78;
   border-radius: 9999px;
-  border: 1px solid #059669;
+  border: 1px solid #FFFDF5;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: #059669;
+/* Soft natural shadow for Bubble Kolom without borders */
+.bubble-column-card {
+  box-shadow: 0 10px 32px -4px rgba(12, 18, 44, 0.06), 0 4px 12px -2px rgba(12, 18, 44, 0.03) !important;
+  border: 0 !important;
 }
 

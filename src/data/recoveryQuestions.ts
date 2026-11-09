@@ -20,7 +20,7 @@ export const RECOVERY_QUESTIONS: RecoveryQuestion[] = [
     options: ['Fā\'il (Pelaku)', 'Maf\'ūl Bih (Objek)', 'Mubtada\'', 'Khabar'],
     correctAnswerIndex: 0,
     explanation: 'Kata "الطَّالِبُ" berkedudukan sebagai Fā\'il (pelaku tindakan membaca) karena ia adalah isim marfū\' yang jatuh setelah fi\'il ma\'lūm, dengan tanda rafa\' dhammah zhahirah.',
-    kitabReference: 'Matan Al-Ajūrumiyyah, Bab Fā\'il',
+    kitabReference: 'Kitab Muthammimah al-Jurumiyah, Bab الفاعل',
   },
   {
     id: 'rec_q02',
@@ -31,7 +31,7 @@ export const RECOVERY_QUESTIONS: RecoveryQuestion[] = [
     options: ['الْأُسْتَاذُ', 'الرِّسَالَةَ', 'فِي', 'الْمَكْتَبِ'],
     correctAnswerIndex: 1,
     explanation: 'Kata "الرِّسَالَةَ" adalah Maf\'ūl Bih (objek penderita) yang berharakat nashab (fathah zhahirah) sebagai sasaran dari perbuatan menulis.',
-    kitabReference: 'Matan Al-Ajūrumiyyah, Bab Maf\'ūl Bih',
+    kitabReference: 'Kitab Muthammimah al-Jurumiyah, Bab المفعول به',
   },
   {
     id: 'rec_q03',
@@ -42,7 +42,7 @@ export const RECOVERY_QUESTIONS: RecoveryQuestion[] = [
     options: ['Dhammah', 'Huruf Wawu (و)', 'Huruf Alif (ا)', 'Tsubūtun Nūn (ثبوت النون)'],
     correctAnswerIndex: 1,
     explanation: 'Jamak Mudzakkar Sālim dirafa\'kan dengan tanda huruf Wawu (و) sebagai pengganti dari dhammah, sedangkan huruf nun di akhirnya adalah pengganti tanwin isim mufrad.',
-    kitabReference: 'Al-Ajūrumiyyah & Nazham Al-Imrithi',
+    kitabReference: 'Kitab Muthammimah al-Jurumiyah, Bab معرفة علامات الإعراب',
   },
   {
     id: 'rec_q04',
@@ -53,7 +53,7 @@ export const RECOVERY_QUESTIONS: RecoveryQuestion[] = [
     options: ['فَعَلَ - يَفْعُلُ (Bab 1)', 'فَعَلَ - يَفْعِلُ (Bab 2)', 'فَعَلَ - يَفْعَلُ (Bab 3)', 'فَعِلَ - يَفْعَلُ (Bab 4)'],
     correctAnswerIndex: 0,
     explanation: 'Fi\'il "نَصَرَ - يَنْصُرُ" mengikuti bab pertama dari Tsulatsi Mujarrad yaitu wazan "فَعَلَ - يَفْعُلُ" dengan fa\'il dan \'ain fi\'il fathah pada madhi serta dhammah pada \'ain fi\'il mudhari\'.',
-    kitabReference: 'Al-Amtsilah At-Tashrīfiyyah, Bab Tsulatsi Mujarrad',
+    kitabReference: 'Kitab Amtsilah Tasrifiyah, Bab الثلاثي المجرد - الباب الأول',
   },
   {
     id: 'rec_q05',
@@ -64,7 +64,7 @@ export const RECOVERY_QUESTIONS: RecoveryQuestion[] = [
     options: ['Isim Inna (Manshub)', 'Khabar Inna (Marfu\')', 'Mubtada\' (Marfu\')', 'Fā\'il (Marfu\')'],
     correctAnswerIndex: 0,
     explanation: 'Huruf "إِنَّ" menashabkan isim dan merafa\'kan khabar (تَنْصِبُ الاسْمَ وَتَرْفَعُ الْخَبَرَ). Maka kata "الْعِلْمَ" adalah Isim Inna yang manshub dengan tanda fathah.',
-    kitabReference: 'Matan Al-Ajūrumiyyah, Bab Inna wa Akhawātuha',
+    kitabReference: 'Kitab Muthammimah al-Jurumiyah, Bab العوامل الداخلة على المبتدأ والخبر',
   },
   {
     id: 'rec_q06',
@@ -75,7 +75,7 @@ export const RECOVERY_QUESTIONS: RecoveryQuestion[] = [
     options: ['Sukun', 'Membuang Nun (حذف النون)', 'Membuang Huruf \'Illat', 'Fathah'],
     correctAnswerIndex: 0,
     explanation: 'Fi\'il mudhari\' shahih akhir yang tidak bersambung dengan alif tasniyah, wawu jamak, atau ya\' mukhatabah dijazmkan dengan tanda sukun asli.',
-    kitabReference: 'Matan Al-Ajūrumiyyah & Mutammimah Al-Ajūrumiyyah',
+    kitabReference: 'Kitab Muthammimah al-Jurumiyah, Bab إعراب الأفعال',
   },
   {
     id: 'rec_q07',
@@ -86,7 +86,7 @@ export const RECOVERY_QUESTIONS: RecoveryQuestion[] = [
     options: ['كَاتِبٌ', 'مَكْتُوبٌ', 'مَكْتَبٌ', 'كِتَابَةٌ'],
     correctAnswerIndex: 0,
     explanation: 'Isim Fā\'il dari fi\'il Tsulatsi Mujarrad dibentuk mengikuti wazan "فَاعِلٌ", sehingga dari kata "كَتَبَ" menjadi "كَاتِبٌ" (orang yang menulis).',
-    kitabReference: 'Al-Amtsilah At-Tashrīfiyyah, Tashrif Isthilahi',
+    kitabReference: 'Kitab Amtsilah Tasrifiyah, Bab تصريف اسم الفاعل واسم المفعول',
   },
   {
     id: 'rec_q08',
@@ -97,7 +97,7 @@ export const RECOVERY_QUESTIONS: RecoveryQuestion[] = [
     options: ['Kasrah Zhahirah', 'Fathah', 'Sukun', 'Ya\''],
     correctAnswerIndex: 0,
     explanation: 'Isim mufrad munsharif yang didahului huruf jarr dijarkan dengan tanda kasrah zhahirah di huruf akhirnya.',
-    kitabReference: 'Matan Al-Ajūrumiyyah, Bab Mahfūdhāt Al-Asmā\'',
+    kitabReference: 'Kitab Muthammimah al-Jurumiyah, Bab المخفوضات من الأسماء',
   },
   {
     id: 'rec_q09',
@@ -108,18 +108,18 @@ export const RECOVERY_QUESTIONS: RecoveryQuestion[] = [
     options: ['Khabar Kāna (Manshub)', 'Isim Kāna (Marfu\')', 'Maf\'ūl Bih', 'Hāl'],
     correctAnswerIndex: 0,
     explanation: 'Kāna merafa\'kan isim dan menashabkan khabar (تَرْفَعُ الاسْمَ وَتَنْصِبُ الْخَبَرَ). Maka "بَارِدًا" adalah Khabar Kāna yang manshub dengan tanda fathah.',
-    kitabReference: 'Al-Ajūrumiyyah, Bab Kāna wa Akhawātuha',
+    kitabReference: 'Kitab Muthammimah al-Jurumiyah, Bab العوامل الداخلة على المبتدأ والخبر (كان وأخواتها)',
   },
   {
     id: 'rec_q10',
     category: 'irab',
-    title: 'Tanda I\'rab Asmā\'ul Khamsah',
+    title: 'Tanda I\'rab Asmā\'us Sittah',
     question: 'Apakah tanda rafa\' pada kata "أَبُوكَ" dalam kalimat "جَاءَ أَبُوكَ"?',
     arabicSnippet: 'جَاءَ أَبُوكَ مِنَ السَّفَرِ',
     options: ['Huruf Wawu (و)', 'Dhammah', 'Huruf Alif (ا)', 'Huruf Nun'],
     correctAnswerIndex: 0,
-    explanation: 'Asmā\'ul Khamsah (أَبٌ، أَخٌ، حَمٌ، فُوْ، ذُوْ) dirafa\'kan dengan Wawu, dinashabkan dengan Alif, dan dijarkan dengan Ya\' selama memenuhi syarat idhafah.',
-    kitabReference: 'Al-Ajūrumiyyah & Alfiyah Ibnu Mālik',
+    explanation: 'Asmā\'us Sittah (أَبٌ، أَخٌ، حَمٌ، فُوْ، ذُوْ، هَنٌ) dirafa\'kan dengan Wawu, dinashabkan dengan Alif, dan dijarkan dengan Ya\' selama memenuhi syarat idhafah ke selain Ya\' Mutakallim.',
+    kitabReference: 'Kitab Muthammimah al-Jurumiyah, Bab معرفة علامات الإعراب',
   },
   {
     id: 'rec_q11',
@@ -130,7 +130,7 @@ export const RECOVERY_QUESTIONS: RecoveryQuestion[] = [
     options: ['مَنْصُورٌ', 'نَاصِرٌ', 'نَصْرٌ', 'مَنْصَرٌ'],
     correctAnswerIndex: 0,
     explanation: 'Isim Maf\'ūl dari Tsulatsi Mujarrad mengikuti wazan "مَفْعُولٌ", contohnya "مَنْصُورٌ" (yang ditolong).',
-    kitabReference: 'Al-Amtsilah At-Tashrīfiyyah, Bab Isim Maf\'ul',
+    kitabReference: 'Kitab Amtsilah Tasrifiyah, Bab تصريف اسم الفاعل واسم المفعول',
   },
   {
     id: 'rec_q12',
@@ -141,7 +141,7 @@ export const RECOVERY_QUESTIONS: RecoveryQuestion[] = [
     options: ['Majrur bil-Idhafah', 'Manshub bil-Maf\'uliyyah', 'Marfu\' bil-Ibtida\'', 'Majzum'],
     correctAnswerIndex: 0,
     explanation: 'Mudhāf ilaih selalu dihukumi majrūr (خَفْضٌ), baik dengan kasrah zhahirah maupun tanda jarr lainnya.',
-    kitabReference: 'Matan Al-Ajūrumiyyah & Mutammimah, Bab Al-Khafdu bil-Idhafah',
+    kitabReference: 'Kitab Muthammimah al-Jurumiyah, Bab المخفوضات من الأسماء (المخفوض بالإضافة)',
   },
   {
     id: 'rec_q13',
@@ -152,7 +152,7 @@ export const RECOVERY_QUESTIONS: RecoveryQuestion[] = [
     options: ['Na\'at (Sifat bagi Ar-Rajulu)', 'Khabar', 'Maf\'ūl Fīh', 'Hāl'],
     correctAnswerIndex: 0,
     explanation: 'Kata "الصَّالِحُ" mengikuti kata sebelumnya dalam rafa\', ma\'rifat, mufrad, dan mudzakkar, sehingga ia adalah Na\'at (sifat haqiqi).',
-    kitabReference: 'Matan Al-Ajūrumiyyah, Bab An-Na\'at',
+    kitabReference: 'Kitab Muthammimah al-Jurumiyah, Bab النعت',
   },
   {
     id: 'rec_q14',
@@ -163,7 +163,7 @@ export const RECOVERY_QUESTIONS: RecoveryQuestion[] = [
     options: ['Ta\'diyah (menjadikan fi\'il muta\'addi)', 'Musyarakah (saling berbuat)', 'Muthawa\'ah', 'Mubalaghah'],
     correctAnswerIndex: 0,
     explanation: 'Faedah paling masyhur dari penambahan hamzah qatha\' pada wazan "أَفْعَلَ" adalah Ta\'diyah (التَّعْدِيَةُ), yaitu merubah fi\'il lazim menjadi muta\'addi.',
-    kitabReference: 'Kitab Al-Maqshūd & Syarah Nazham Al-Maqshud',
+    kitabReference: 'Kitab Amtsilah Tasrifiyah, Bab الثلاثي المزيد فيه بحرف',
   },
   {
     id: 'rec_q15',
@@ -174,7 +174,7 @@ export const RECOVERY_QUESTIONS: RecoveryQuestion[] = [
     options: ['Hadzfun Nūn (Membuang Nun)', 'Fathah Zhahirah', 'Sukun', 'Tsubūtun Nūn'],
     correctAnswerIndex: 0,
     explanation: 'Al-Af\'ālul Khamsah (fi\'il mudhari\' yang bersambung dengan alif tatsniyah, wawu jamak, atau ya\' mukhatabah) dinashabkan dan dijazmkan dengan membuang nun (حَذْفُ النُّونِ).',
-    kitabReference: 'Matan Al-Ajūrumiyyah, Bab I\'rab Af\'al',
+    kitabReference: 'Kitab Muthammimah al-Jurumiyah, Bab إعراب الأفعال',
   },
   {
     id: 'rec_q16',
@@ -185,7 +185,7 @@ export const RECOVERY_QUESTIONS: RecoveryQuestion[] = [
     options: ['Hāl (Penjelas Keadaan Pelaku)', 'Tamyīz', 'Maf\'ūl Liajlih', 'Maf\'ūl Muthlaq'],
     correctAnswerIndex: 0,
     explanation: 'Hāl adalah isim nakirah manshub yang menjelaskan keadaan (hay\'ah) fā\'il atau maf\'ūl saat perbuatan terjadi. Zaid datang dalam keadaan berkendara.',
-    kitabReference: 'Matan Al-Ajūrumiyyah, Bab Al-Hāl',
+    kitabReference: 'Kitab Muthammimah al-Jurumiyah, Bab الحال',
   },
   {
     id: 'rec_q17',
@@ -196,7 +196,7 @@ export const RECOVERY_QUESTIONS: RecoveryQuestion[] = [
     options: ['Tamyīz', 'Hāl', 'Mustatsna', 'Badal'],
     correctAnswerIndex: 0,
     explanation: 'Tamyīz adalah isim nakirah manshub yang berfungsi menjelaskan kesamaran (mubham) pada zat atau penisbatan kalimat.',
-    kitabReference: 'Matan Al-Ajūrumiyyah & Nazham Al-Imrithi, Bab At-Tamyiz',
+    kitabReference: 'Kitab Muthammimah al-Jurumiyah, Bab التمييز',
   },
   {
     id: 'rec_q18',
@@ -207,7 +207,7 @@ export const RECOVERY_QUESTIONS: RecoveryQuestion[] = [
     options: ['تَفَعَّلَ - يَتَفَعَّلُ', 'تَفَاعَلَ - يَتَفَاعَلُ', 'اسْتَفْعَلَ - يَسْتَفْعِلُ', 'افْتَعَلَ - يَفْتَعِلُ'],
     correctAnswerIndex: 0,
     explanation: 'Kata "تَعَلَّمَ" bermula dari huruf ta\' ziyadah di awal dan tasydid pada \'ain fi\'il (lam), sehingga pas dengan wazan "تَفَعَّلَ".',
-    kitabReference: 'Al-Amtsilah At-Tashrīfiyyah, Tsulatsi Mazid bi Harfaini',
+    kitabReference: 'Kitab Amtsilah Tasrifiyah, Bab الثلاثي المزيد فيه بحرفين',
   },
   {
     id: 'rec_q19',
@@ -218,7 +218,7 @@ export const RECOVERY_QUESTIONS: RecoveryQuestion[] = [
     options: ['Kasrah (menggantikan fathah)', 'Fathah Zhahirah', 'Huruf Ya\'', 'Sukun'],
     correctAnswerIndex: 0,
     explanation: 'Jamak Muannats Sālim memiliki keistimewaan dinashabkan dengan tanda Kasrah sebagai pengganti dari fathah (يُنْصَبُ بِالْكَسْرَةِ نِيَابَةً عَنِ الْفَتْحَةِ).',
-    kitabReference: 'Matan Al-Ajūrumiyyah, Bab \'Alāmāt An-Nashbi',
+    kitabReference: 'Kitab Muthammimah al-Jurumiyah, Bab معرفة علامات الإعراب',
   },
   {
     id: 'rec_q20',
@@ -228,8 +228,8 @@ export const RECOVERY_QUESTIONS: RecoveryQuestion[] = [
     arabicSnippet: 'حُرُوفُ نَصْبِ الْفِعْلِ الْمُضَارِعِ',
     options: ['لَنْ (Lan)', 'لَمْ (Lam)', 'إِنْ (In)', 'فِي (Fi)'],
     correctAnswerIndex: 0,
-    explanation: 'Nawashib fi\'il mudhari\' ada 10 menurut Ajūrumiyyah, di antaranya adalah "أَنْ، لَنْ، إِذَنْ، كَيْ...". Huruf "لَنْ" menashabkan fi\'il mudhari\' dengan makna nafi mustaqbal.',
-    kitabReference: 'Matan Al-Ajūrumiyyah, Bab Nawashibul Mudhari\'',
+    explanation: 'Nawashib fi\'il mudhari\' ada 10 menurut Muthammimah, di antaranya adalah "أَنْ، لَنْ، إِذَنْ، كَيْ...". Huruf "لَنْ" menashabkan fi\'il mudhari\' dengan makna nafi mustaqbal.',
+    kitabReference: 'Kitab Muthammimah al-Jurumiyah, Bab إعراب الأفعال (نواصب المضارع)',
   },
 ];
 

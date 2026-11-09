@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { db } from '../firebase/config';
-import { collection, addDoc, getDocs } from 'firebase/firestore';
+import { collection, addDoc } from 'firebase/firestore';
 import { ExerciseItem, ExerciseCategory, ExerciseDifficulty } from '../types';
 import { handleFirestoreError, OperationType } from '../firebase/errorHandler';
 import firebaseConfig from '../../firebase-applet-config.json';
@@ -12,9 +12,6 @@ import {
   AlertCircle,
   Database,
   Cpu,
-  Flame,
-  Users,
-  Award,
   Bot,
 } from 'lucide-react';
 
@@ -106,7 +103,7 @@ export const AdminTab: React.FC = () => {
     return (
       <div className="max-w-4xl mx-auto px-4 py-16 text-center">
         <ShieldCheck className="w-16 h-16 mx-auto text-slate-300 mb-4" />
-        <h2 className="text-xl font-bold text-slate-800">Akses Khusus Administrator</h2>
+        <h2 className="text-xl font-bold text-[#0C122C]">Akses Khusus Administrator</h2>
         <p className="text-sm text-slate-500 mt-2">
           Halaman ini hanya dapat diakses oleh akun admin terdaftar (izzahfadiyah649@gmail.com).
         </p>
@@ -115,12 +112,15 @@ export const AdminTab: React.FC = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8 animate-fadeIn">
-      {/* Top Banner */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-emerald-800 via-emerald-700 to-teal-900 rounded-[2.5rem] p-6 sm:p-8 text-white shadow-xl shadow-emerald-950/20 border border-emerald-600/30">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+      {/* Top Banner - Bubble Bash Midnight Navy Hero with Sunny Yellow accents */}
+      <div className="relative overflow-hidden bg-[#0C122C] rounded-[2.5rem] p-6 sm:p-8 text-white shadow-xl shadow-[#0C122C]/25 border-2 border-[#FFD233]/40">
+        <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-[#FFD233]/15 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-12 -left-12 w-48 h-48 rounded-full bg-[#FF2D78]/15 blur-3xl pointer-events-none" />
+
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-white/10 p-2 flex items-center justify-center border border-white/20 shrink-0">
+            <div className="w-16 h-16 rounded-2xl bg-[#161F46] p-2 flex items-center justify-center border-2 border-[#FFD233]/40 shrink-0 shadow-md">
               <img
                 src="/assets/aistudio/logo-removebg-preview_62f4cdfa.png"
                 alt="SmartKib Logo"
@@ -128,26 +128,26 @@ export const AdminTab: React.FC = () => {
               />
             </div>
             <div>
-              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-bold bg-white/15 backdrop-blur-md text-white shadow-xs border border-white/20 mb-2">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-300" />
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-black bg-[#FFD233]/20 text-[#FFD233] border border-[#FFD233]/40 shadow-xs mb-2">
+                <ShieldCheck className="w-3.5 h-3.5 text-[#FFD233]" />
                 <span>Lembaga Pengawas &amp; Pengembang Kurikulum SmartKib</span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
                 Panel Kendali Administrator
               </h1>
-              <p className="text-xs sm:text-sm text-emerald-100/90 font-medium mt-1 max-w-xl">
+              <p className="text-xs sm:text-sm text-slate-300 font-medium mt-1 max-w-xl leading-relaxed">
                 Selamat datang Ustadzah Izzah Fadiyah. Di sini Anda dapat menambahkan soal latihan baru, meninjau status sistem, dan mengelola materi kurikulum santri.
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md px-5 py-3 rounded-2xl border border-white/20 shadow-md shrink-0">
-            <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center text-emerald-300">
+          <div className="flex items-center gap-3 bg-[#161F46] px-5 py-3 rounded-2xl border-2 border-white/10 shadow-md shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-[#FFD233]/20 flex items-center justify-center text-[#FFD233] border border-[#FFD233]/30">
               <ShieldCheck className="w-6 h-6" />
             </div>
             <div>
-              <span className="text-xs text-emerald-200 font-medium block">Status Akun</span>
-              <span className="text-sm font-bold text-white">Admin Terverifikasi</span>
+              <span className="text-xs text-slate-400 font-bold block">Status Akun</span>
+              <span className="text-sm font-black text-white">Admin Terverifikasi</span>
             </div>
           </div>
         </div>
@@ -155,65 +155,65 @@ export const AdminTab: React.FC = () => {
 
       {/* System Status Indicators */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-5 rounded-[1.75rem] bg-white border border-emerald-100 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold shadow-2xs border border-emerald-200">
+        <div className="p-5 rounded-[1.75rem] bg-white border-2 border-slate-200/90 shadow-sm flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-[#FFF9D2] text-[#FF6B00] flex items-center justify-center font-bold shadow-xs border-2 border-[#FFD233]">
             <Database className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-xs text-slate-500 font-medium block">Cloud Firestore</span>
-            <span className="text-sm font-bold text-slate-900">{firebaseConfig.projectId}</span>
+            <span className="text-xs text-slate-500 font-bold block">Cloud Firestore</span>
+            <span className="text-sm font-black text-[#0C122C]">{firebaseConfig.projectId}</span>
           </div>
         </div>
 
-        <div className="p-5 rounded-[1.75rem] bg-white border border-emerald-100 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center font-bold shadow-2xs border border-teal-200">
+        <div className="p-5 rounded-[1.75rem] bg-white border-2 border-slate-200/90 shadow-sm flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-[#E0F9FF] text-[#0284C7] flex items-center justify-center font-bold shadow-xs border-2 border-[#00D2FF]">
             <Cpu className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-xs text-slate-500 font-medium block">Backend Express Server</span>
-            <span className="text-sm font-bold text-slate-900">
+            <span className="text-xs text-slate-500 font-bold block">Backend Express Server</span>
+            <span className="text-sm font-black text-[#0C122C]">
               {apiHealth?.status === 'ok' ? 'Online (/api/index.ts)' : 'Aktif (Vercel Ready)'}
             </span>
           </div>
         </div>
 
-        <div className="p-5 rounded-[1.75rem] bg-white border border-emerald-100 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold shadow-2xs border border-emerald-200">
+        <div className="p-5 rounded-[1.75rem] bg-white border-2 border-slate-200/90 shadow-sm flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-[#FFE5EE] text-[#FF2D78] flex items-center justify-center font-bold shadow-xs border-2 border-[#FF2D78]/30">
             <Bot className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-xs text-slate-500 font-medium block">Gemini AI Model</span>
-            <span className="text-sm font-bold text-slate-900">gemini-2.5-flash</span>
+            <span className="text-xs text-slate-500 font-bold block">Gemini AI Model</span>
+            <span className="text-sm font-black text-[#0C122C]">gemini-2.5-flash</span>
           </div>
         </div>
       </div>
 
       {/* Add New Exercise Form */}
-      <div className="bg-white rounded-[2rem] p-6 sm:p-8 border border-emerald-100 shadow-sm">
-        <div className="flex items-center justify-between border-b border-emerald-100 pb-4 mb-6">
+      <div className="bg-white rounded-[2rem] p-6 sm:p-8 border-2 border-slate-200/90 shadow-sm">
+        <div className="flex items-center justify-between border-b-2 border-slate-100 pb-4 mb-6">
           <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center border border-emerald-200">
+            <div className="w-9 h-9 rounded-xl bg-[#FFF9D2] text-[#FF6B00] flex items-center justify-center border-2 border-[#FFD233]">
               <PlusCircle className="w-5 h-5" />
             </div>
-            <h2 className="text-base sm:text-lg font-bold text-slate-900">
-              Tambah Soal Latihan & Kuis Baru (Simpan ke Firestore)
+            <h2 className="text-base sm:text-lg font-black text-[#0C122C]">
+              Tambah Soal Latihan &amp; Kuis Baru (Simpan ke Firestore)
             </h2>
           </div>
-          <span className="text-xs text-emerald-800 font-medium bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+          <span className="text-xs text-[#0C122C] font-black bg-[#E0F9FF] px-3 py-1 rounded-full border border-[#00D2FF]/40">
             Realtime Sync
           </span>
         </div>
 
         {saveSuccess && (
-          <div className="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-950 text-sm flex items-center gap-3 font-semibold shadow-2xs">
-            <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+          <div className="mb-6 p-4 rounded-2xl bg-[#E0F9FF] border-2 border-[#00D2FF] text-[#0C122C] text-sm flex items-center gap-3 font-bold shadow-xs">
+            <CheckCircle2 className="w-5 h-5 text-[#0090FF] shrink-0" />
             <span>Soal latihan baru berhasil disimpan ke database Firestore!</span>
           </div>
         )}
 
         {errorMsg && (
-          <div className="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-sm flex items-center gap-3 font-medium shadow-2xs">
-            <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
+          <div className="mb-6 p-4 rounded-2xl bg-[#FFE5EE] border-2 border-[#FF2D78] text-[#FF2D78] text-sm flex items-center gap-3 font-bold shadow-xs">
+            <AlertCircle className="w-5 h-5 text-[#FF2D78] shrink-0" />
             <span>{errorMsg}</span>
           </div>
         )}
@@ -221,37 +221,37 @@ export const AdminTab: React.FC = () => {
         <form onSubmit={handleAddExercise} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="md:col-span-1">
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">
+              <label className="block text-xs font-black text-slate-700 mb-1.5">
                 Kategori Soal
               </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value as any)}
-                className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-800 font-medium text-sm focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500"
+                className="w-full px-4 py-2.5 rounded-2xl bg-[#FFFDF5] border-2 border-slate-200 text-[#0C122C] font-bold text-sm focus:bg-white focus:outline-hidden focus:border-[#00D2FF]"
               >
                 <option value="nahwu">Ilmu Nahwu (Tarkib)</option>
                 <option value="shorof">Ilmu Shorof (Morfologi)</option>
-                <option value="irab">Kajian I'rab Khusus</option>
+                <option value="irab">Kajian I&apos;rab Khusus</option>
               </select>
             </div>
 
             <div className="md:col-span-1">
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">
+              <label className="block text-xs font-black text-slate-700 mb-1.5">
                 Tingkat Kesulitan
               </label>
               <select
                 value={difficulty}
                 onChange={(e) => setDifficulty(e.target.value as any)}
-                className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-800 font-medium text-sm focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500"
+                className="w-full px-4 py-2.5 rounded-2xl bg-[#FFFDF5] border-2 border-slate-200 text-[#0C122C] font-bold text-sm focus:bg-white focus:outline-hidden focus:border-[#00D2FF]"
               >
-                <option value="pemula">Mubtadi' (Pemula)</option>
+                <option value="pemula">Mubtadi&apos; (Pemula)</option>
                 <option value="menengah">Mutawassith (Menengah)</option>
                 <option value="mahir">Mutaqaddim (Mahir)</option>
               </select>
             </div>
 
             <div className="md:col-span-1">
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">
+              <label className="block text-xs font-black text-slate-700 mb-1.5">
                 Judul Latihan
               </label>
               <input
@@ -260,13 +260,13 @@ export const AdminTab: React.FC = () => {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Contoh: Menentukan Isim Kaana"
-                className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-800 font-medium text-sm focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500 placeholder:text-slate-400"
+                className="w-full px-4 py-2.5 rounded-2xl bg-[#FFFDF5] border-2 border-slate-200 text-[#0C122C] font-bold text-sm focus:bg-white focus:outline-hidden focus:border-[#00D2FF] placeholder:text-slate-400"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
+            <label className="block text-xs font-black text-slate-700 mb-1.5">
               Potongan Kalimat / Kata Arab (Opsional namun dianjurkan)
             </label>
             <input
@@ -275,12 +275,12 @@ export const AdminTab: React.FC = () => {
               value={arabicSnippet}
               onChange={(e) => setArabicSnippet(e.target.value)}
               placeholder="Contoh: كَانَ زَيْدٌ عَالِمًا"
-              className="w-full font-serif text-xl px-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 text-right focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500 placeholder:text-slate-400"
+              className="w-full font-serif text-xl px-4 py-2.5 rounded-2xl bg-[#FFFDF5] border-2 border-slate-200 text-[#0C122C] text-right font-black focus:bg-white focus:outline-hidden focus:border-[#00D2FF] placeholder:text-slate-400"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
+            <label className="block text-xs font-black text-slate-700 mb-1.5">
               Pertanyaan Soal
             </label>
             <textarea
@@ -289,13 +289,13 @@ export const AdminTab: React.FC = () => {
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
               placeholder="Tuliskan pertanyaan yang menguji pemahaman santri..."
-              className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-800 font-normal text-sm focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500 placeholder:text-slate-400"
+              className="w-full px-4 py-2.5 rounded-2xl bg-[#FFFDF5] border-2 border-slate-200 text-[#0C122C] font-medium text-sm focus:bg-white focus:outline-hidden focus:border-[#00D2FF] placeholder:text-slate-400"
             />
           </div>
 
           {/* Options */}
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-2">
+            <label className="block text-xs font-black text-slate-700 mb-2">
               Pilihan Jawaban (Pilih radio untuk jawaban yang benar):
             </label>
             <div className="space-y-2.5">
@@ -306,9 +306,9 @@ export const AdminTab: React.FC = () => {
                     name="correctAnswer"
                     checked={correctAnswerIndex === idx}
                     onChange={() => setCorrectAnswerIndex(idx)}
-                    className="w-5 h-5 text-emerald-600 accent-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                    className="w-5 h-5 text-[#FF2D78] accent-[#FF2D78] cursor-pointer"
                   />
-                  <span className="text-xs font-bold text-slate-500 w-6">
+                  <span className="text-xs font-black text-slate-600 w-6">
                     {String.fromCharCode(65 + idx)}.
                   </span>
                   <input
@@ -317,7 +317,7 @@ export const AdminTab: React.FC = () => {
                     value={opt}
                     onChange={(e) => handleOptionChange(idx, e.target.value)}
                     placeholder={`Pilihan ${String.fromCharCode(65 + idx)}`}
-                    className="flex-1 px-4 py-2 rounded-2xl bg-slate-50 border border-slate-200 text-slate-800 font-medium text-sm focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500"
+                    className="flex-1 px-4 py-2 rounded-2xl bg-[#FFFDF5] border-2 border-slate-200 text-[#0C122C] font-bold text-sm focus:bg-white focus:outline-hidden focus:border-[#00D2FF]"
                   />
                 </div>
               ))}
@@ -325,8 +325,8 @@ export const AdminTab: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
-              Pembahasan & Kaidah Nahwu/Shorof Lengkap
+            <label className="block text-xs font-black text-slate-700 mb-1.5">
+              Pembahasan &amp; Kaidah Nahwu/Shorof Lengkap
             </label>
             <textarea
               required
@@ -334,14 +334,14 @@ export const AdminTab: React.FC = () => {
               value={explanation}
               onChange={(e) => setExplanation(e.target.value)}
               placeholder="Jelaskan alasan gramatikal kenapa jawaban tersebut benar, sebutkan kedudukan, wazan, dan rujukan kaidah..."
-              className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-800 font-normal text-sm focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500 placeholder:text-slate-400"
+              className="w-full px-4 py-2.5 rounded-2xl bg-[#FFFDF5] border-2 border-slate-200 text-[#0C122C] font-medium text-sm focus:bg-white focus:outline-hidden focus:border-[#00D2FF] placeholder:text-slate-400"
             />
           </div>
 
           <button
             type="submit"
             disabled={saving}
-            className="px-6 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-sm shadow-emerald-700/20 transition-all flex items-center gap-2 disabled:opacity-50 active:scale-95 cursor-pointer"
+            className="px-7 py-3.5 rounded-2xl bg-[#FF2D78] hover:bg-[#E02468] text-white font-black text-sm shadow-md shadow-[#FF2D78]/25 transition-all flex items-center gap-2 disabled:opacity-50 active:scale-95 cursor-pointer"
           >
             <PlusCircle className="w-5 h-5" />
             <span>{saving ? 'Menyimpan ke Firestore...' : 'Simpan Soal ke Database'}</span>
