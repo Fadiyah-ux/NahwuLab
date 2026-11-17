@@ -75,10 +75,21 @@ export interface ExerciseItem {
   createdBy?: string;
 }
 
+export interface PdfSectionLink {
+  label: string;
+  page: number;
+}
+
 export interface BookChapter {
   id: string;
+  groupTitle: string;
   titleArabic: string;
   titleIndo: string;
+  pdfPage: number;
+  pdfEndPage?: number;
+  pdfSections?: PdfSectionLink[];
+  supplementImageUrl?: string;
+  pdfNote?: string;
   contentArabic: string;
   translation: string;
   explanation: string;
@@ -94,6 +105,9 @@ export interface LibraryBookItem {
   description: string;
   level: string;
   coverColor: string;
+  pdfUrl: string;
+  totalPages: number;
+  driveUrl?: string;
   chapters: BookChapter[];
   isBuiltin?: boolean;
 }

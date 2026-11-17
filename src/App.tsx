@@ -95,12 +95,12 @@ const MainLayout: React.FC = () => {
             </div>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-2 text-xs font-bold">
-            <span className="px-3 py-1 rounded-full bg-[#FFF9D2] text-[#854D0E] border border-[#FDE047] shadow-2xs">
-              Muthammimah al-Jurumiyah (31 Bab)
+            <span className="px-3 py-1 rounded-full bg-[#FFE5EE] text-[#BE123C] border border-[#FECDD3] shadow-2xs">
+              Al-Amtsilah At-Tashrifiyah (24 Bab)
             </span>
             <span className="text-slate-300">•</span>
-            <span className="px-3 py-1 rounded-full bg-[#FFE5EE] text-[#BE123C] border border-[#FECDD3] shadow-2xs">
-              Amtsilah Tasrifiyah (24 Bab)
+            <span className="px-3 py-1 rounded-full bg-[#FFF9D2] text-[#854D0E] border border-[#FDE047] shadow-2xs">
+              Mutammimah Al-Ajurrumiyah (31 Bab)
             </span>
             <span className="text-slate-300">•</span>
             <span className="px-3 py-1 rounded-full bg-[#E0F9FF] text-[#0369A1] border border-[#BAE6FD] shadow-2xs">

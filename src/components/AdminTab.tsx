@@ -64,13 +64,14 @@ export const AdminTab: React.FC = () => {
     setErrorMsg(null);
     setSaveSuccess(false);
 
+    const trimmedArabic = arabicSnippet.trim();
     const newExercise: ExerciseItem = {
       id: 'ex_' + Date.now(),
       title,
       category,
       difficulty,
       question,
-      arabicSnippet: arabicSnippet.trim() || undefined,
+      ...(trimmedArabic ? { arabicSnippet: trimmedArabic } : {}),
       options,
       correctAnswerIndex,
       explanation,

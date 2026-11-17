@@ -1,6 +1,19 @@
 import { LibraryBookItem, ExerciseItem } from '../types';
+import { BOOK_PDF_META, CHAPTER_PDF_META } from './kitabPdfMetadata';
 
-export const SEED_BOOKS: LibraryBookItem[] = [
+const RAW_SEED_BOOKS: Array<
+  Omit<LibraryBookItem, 'pdfUrl' | 'totalPages' | 'driveUrl' | 'chapters'> & {
+    chapters: Array<{
+      id: string;
+      titleArabic: string;
+      titleIndo: string;
+      contentArabic: string;
+      translation: string;
+      explanation: string;
+      keyPoints?: string[];
+    }>;
+  }
+> = [
   {
     "id": "mutammimah-al-jurumiyyah",
     "title": "Muthammimah al-Jurumiyah",
@@ -95,12 +108,12 @@ export const SEED_BOOKS: LibraryBookItem[] = [
       {
         "id": "mutammimah-marfuat",
         "titleArabic": "بَابُ الْمَرْفُوعَاتِ مِنَ الْأَسْمَاءِ",
-        "titleIndo": "Bab 7: Ikhtisar Tujuh Kategori Isim Marfu'",
-        "contentArabic": "الْمَرْفُوعَاتُ سَبْعَةٌ وَهِيَ: الْفَاعِلُ، وَالْمَفْعُولُ الَّذِي لَمْ يُسَمَّ فَاعِلُهُ، وَالْمُبْتَدَأُ، وَخَبَرُهُ، وَاسْمُ كَانَ وَأَخَوَاتِهَا، وَخَبَرُ إِنَّ وَأَخَوَاتِهَا، وَالتَّابِعُ لِلْمَرْفُوعِ وَهُوَ أَرْبَعَةُ أَشْيَاءَ: النَّعْتُ، وَالْعَطْفُ، وَالتَّوْكِيدُ، وَالْبَدَلُ.",
-        "translation": "Isim-isim yang berstatus Marfu' ada 7: (1) Fa'il, (2) Maf'ul yang tidak disebutkan fa'ilnya (Na'ibul Fa'il), (3) Mubtada', (4) Khabar Mubtada', (5) Isim Kana dan saudaranya, (6) Khabar Inna dan saudaranya, (7) Pengikut isim marfu' (Tawabi') yang terdiri atas Na'at, 'Athaf, Taukid, dan Badal.",
-        "explanation": "Status Rafa' adalah martabat i'rab tertinggi pada isim karena ia menandai pokok pembicaraan (Musnad ilaih dan Musnad). Mutammimah merincinya bab demi bab secara berurutan.",
+        "titleIndo": "Bab 7: Ikhtisar Sepuluh Kategori Isim Marfu'",
+        "contentArabic": "الْمَرْفُوعَاتُ عَشَرَةٌ وَهِيَ: الْفَاعِلُ، وَنَائِبُهُ عَنِ الْفَاعِلِ، وَالْمُبْتَدَأُ، وَخَبَرُهُ، وَاسْمُ كَانَ وَأَخَوَاتِهَا، وَاسْمُ أَفْعَالِ الْمُقَارَبَةِ، وَاسْمُ الْحُرُوفِ الْمُشَبَّهَةِ بِلَيْسَ، وَخَبَرُ إِنَّ وَأَخَوَاتِهَا، وَخَبَرُ لَا الَّتِي لِنَفْيِ الْجِنْسِ، وَالتَّابِعُ لِلْمَرْفُوعِ وَهُوَ أَرْبَعَةُ أَشْيَاءَ: النَّعْتُ، وَالْعَطْفُ، وَالتَّوْكِيدُ، وَالْبَدَلُ.",
+        "translation": "Isim-isim yang berstatus Marfu' menurut Mutammimah ada 10: (1) Fa'il, (2) Na'ibul Fa'il, (3) Mubtada', (4) Khabar Mubtada', (5) Isim Kaana dan saudaranya, (6) Isim Af'alul Muqarabah, (7) Isim Huruf yang diserupakan dengan Laisa, (8) Khabar Inna dan saudaranya, (9) Khabar Laa li Nafyil Jins, dan (10) Pengikut isim marfu' (Tawabi') yang terdiri atas Na'at, 'Athaf, Taukid, dan Badal.",
+        "explanation": "Berbeda dengan matan Al-Ajurumiyyah ringkas yang menyebut tujuh secara garis besar, Syaikh Al-Haththab dalam Mutammimah merinci seluruhnya menjadi sepuluh golongan marfu'at.",
         "keyPoints": [
-          "Tujuh marfu'at asma': Fa'il, Na'ibul Fa'il, Mubtada', Khabar, Isim Kana, Khabar Inna, Tawabi'.",
+          "Sepuluh marfu'at asma' dalam Mutammimah (hal. 30): Fa'il, Na'ibul Fa'il, Mubtada', Khabar, Isim Kaana, Isim Af'al Muqarabah, Isim Ma/La/Lata/In, Khabar Inna, Khabar La Jins, dan Tawabi'.",
           "Tawabi' lil marfu': Na'at, 'Athaf, Taukid, Badal."
         ]
       },
@@ -575,14 +588,14 @@ export const SEED_BOOKS: LibraryBookItem[] = [
       },
       {
         "id": "amtsilah-mulhaq-tadahraja",
-        "titleArabic": "مُلْحَقُ تَدَحْرَجَ (الْخُمَاسِيُّ الْمُلْحَقُ)",
-        "titleIndo": "Bab 12: Mulhaq Tadahraja (تَفَعْلَلَ والمُلحَقَاتُ به)",
-        "contentArabic": "الْمُلْحَقُ بِتَدَحْرَجَ خَمْسَةُ أَبْوَابٍ كُلُّهَا لِلْمُطَاوَعَةِ:\n١. (تَفَعْلَلَ يَتَفَعْلَلُ تَفَعْلُلًا) نَحْوُ: تَدَحْرَجَ يَتَدَحْرَجُ تَدَحْرُجًا.\n٢. (تَفَوْعَلَ يَتَفَوْعَلُ تَفَوْعُلًا) نَحْوُ: تَجَوْرَبَ يَتَجَوْرَبُ تَجَوْرُبًا (لَبِسَ الْجَوْرَبَ).\n٣. (تَفَيْعَلَ يَتَفَيْعَلُ تَفَيْعُلًا) نَحْوُ: تَشَيْطَنَ يَتَشَيْطَنُ تَشَيْطُنًا.\n٤. (تَفَعْوَلَ يَتَفَعْوَلُ تَفَعْوُلًا) نَحْوُ: تَرَهْوَكَ يَتَرَهْوَكُ تَرَهْوُكًا.\n٥. (تَفَعْلَى يَتَفَعْلَى تَفَعْلِيًا) نَحْوُ: تَسَلْقَى يَتَسَلْقَى تَسَلْقِيًا.",
-        "translation": "Mulhaq Tadahraja mencakup 5 bab yang disamakan dengan pola lima huruf (khumasi): (1) تَفَعْلَلَ (تَدَحْرَجَ menggelinding), (2) تَفَوْعَلَ (تَجَوْرَبَ memakai kaos kaki), (3) تَفَيْعَلَ (تَشَيْطَنَ bersikap seperti setan), (4) تَفَعْوَلَ (تَرَهْوَكَ), (5) تَفَعْلَى (تَسَلْقَى terlentang).",
-        "explanation": "Kelima bab ini berfaedah muthawa'ah dari wazan mulhaq bi dahraja.",
+        "titleArabic": "تَفَعْلَلَ وَالْأَبْوَابُ السَّبْعَةُ الْمُلْحَقَةُ بِتَدَحْرَجَ",
+        "titleIndo": "Bab 12: Ruba'i Mazid تَفَعْلَلَ & 7 Bab Mulhaq Tadahraja",
+        "contentArabic": "مَزِيدُ الرُّبَاعِيِّ بِحَرْفٍ: (تَفَعْلَلَ يَتَفَعْلَلُ تَفَعْلُلًا) نَحْوُ: تَدَحْرَجَ يَتَدَحْرَجُ تَدَحْرُجًا.\nوَالْمُلْحَقُ بِتَدَحْرَجَ سَبْعَةُ أَبْوَابٍ:\n١. (تَفَعْلَلَ) نَحْوُ: تَجَلْبَبَ يَتَجَلْبَبُ تَجَلْبُبًا.\n٢. (تَفَوْعَلَ) نَحْوُ: تَجَوْرَبَ يَتَجَوْرَبُ تَجَوْرُبًا.\n٣. (تَمَفْعَلَ) نَحْوُ: تَمَسْكَنَ يَتَمَسْكَنُ تَمَسْكُنًا.\n٤. (تَفَيْعَلَ) نَحْوُ: تَشَيْطَنَ يَتَشَيْطَنُ تَشَيْطُنًا.\n٥. (تَفَعْوَلَ) نَحْوُ: تَرَهْوَكَ يَتَرَهْوَكُ تَرَهْوُكًا.\n٦. (تَفَعْيَلَ) نَحْوُ: تَشَرْيَفَ يَتَشَرْيَفُ تَشَرْيُفًا.\n٧. (تَفَعْلَى) نَحْوُ: تَسَلْقَى يَتَسَلْقَى تَسَلْقِيًا.",
+        "translation": "Ruba'i Mazid 1 huruf yaitu تَفَعْلَلَ (تَدَحْرَجَ = menjadi tergelinding), disertai 7 bab Mulhaq bi Tadahraja dalam kitab Amtsilah Tasrifiyah: (1) تَجَلْبَبَ (berbaju kurung), (2) تَجَوْرَبَ (berkaos kaki), (3) تَمَسْكَنَ (bersikap rendah/miskin), (4) تَشَيْطَنَ (berperilaku seperti setan), (5) تَرَهْوَكَ (berjalan gemulai), (6) تَشَرْيَفَ (tumbuh tinggi/tangkai), dan (7) تَسَلْقَى (berbaring terlentang).",
+        "explanation": "Seluruh tujuh bab mulhaq ini mengikuti susunan huruf, harakat, dan sukun wazan تَفَعْلَلَ serta berfaedah muthawa'ah.",
         "keyPoints": [
-          "Tadahraja dan lima cabangnya.",
-          "Faedah: Muthawa'ah terhadap fi'il ruba'i mujarrad mulhaq."
+          "Ruba'i Mazid 1 huruf: تَدَحْرَجَ يَتَدَحْرَجُ.",
+          "Tujuh Mulhaq bi Tadahraja (hal. 18): Tajalbaba, Tajauraba, Tamaskana, Tasyaithana, Tarahwaka, Tasyaryafa, Tasalqa."
         ]
       },
       {
@@ -744,6 +757,36 @@ export const SEED_BOOKS: LibraryBookItem[] = [
     ]
   }
 ];
+
+const ORDERED_BOOK_IDS = ['al-amtsilah-at-tashrifiyyah', 'mutammimah-al-jurumiyyah'];
+
+export const SEED_BOOKS: LibraryBookItem[] = ORDERED_BOOK_IDS
+  .map((id) => RAW_SEED_BOOKS.find((b) => b.id === id)!)
+  .filter(Boolean)
+  .map((book) => {
+    const bookMeta = BOOK_PDF_META[book.id] || { pdfUrl: '', totalPages: 0 };
+    return {
+      ...book,
+      pdfUrl: bookMeta.pdfUrl,
+      totalPages: bookMeta.totalPages,
+      driveUrl: bookMeta.driveUrl,
+      chapters: book.chapters.map((ch) => {
+        const chMeta = CHAPTER_PDF_META[ch.id] || {
+          groupTitle: 'Materi Pokok',
+          pdfPage: 1,
+        };
+        return {
+          ...ch,
+          groupTitle: chMeta.groupTitle,
+          pdfPage: chMeta.pdfPage,
+          pdfEndPage: chMeta.pdfEndPage,
+          pdfSections: chMeta.pdfSections,
+          supplementImageUrl: chMeta.supplementImageUrl,
+          pdfNote: chMeta.pdfNote,
+        };
+      }),
+    };
+  });
 
 export const SEED_EXERCISES: ExerciseItem[] = [
   {

@@ -69,7 +69,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           currentStreak: 0,
           longestStreak: 0,
           lastLoginDate: todayStr,
-          lastActiveDate: undefined,
           streakStatus: 'idle',
           missedDays: 0,
           streakRecovery: null,

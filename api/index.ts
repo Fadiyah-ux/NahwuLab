@@ -67,6 +67,87 @@ app.get('/api/health', (_req: Request, res: Response) => {
   });
 });
 
+function extractGoogleDriveFileId(input: string): string | null {
+  const trimmed = (input || '').trim();
+  if (!trimmed) return null;
+
+  if (/^[a-zA-Z0-9_-]{10,120}$/.test(trimmed)) {
+    return trimmed;
+  }
+
+  const fileMatch = trimmed.match(/\/file\/d\/([a-zA-Z0-9_-]{10,120})/);
+  if (fileMatch) return fileMatch[1];
+
+  const openMatch = trimmed.match(/[?&]id=([a-zA-Z0-9_-]{10,120})/);
+  if (openMatch) return openMatch[1];
+
+  return null;
+}
+
+app.get('/api/gdrive-pdf', async (req: Request, res: Response) => {
+  try {
+    const rawUrl = typeof req.query.url === 'string' ? req.query.url : '';
+    const rawId = typeof req.query.fileId === 'string' ? req.query.fileId : '';
+    const fileId = extractGoogleDriveFileId(rawId || rawUrl);
+
+    if (!fileId) {
+      res.status(400).json({ error: 'Link atau ID Google Drive tidak valid.' });
+      return;
+    }
+
+    const downloadUrl = `https://drive.google.com/uc?export=download&confirm=t&id=${encodeURIComponent(fileId)}`;
+    let upstream = await fetch(downloadUrl, {
+      redirect: 'follow',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; SmartKibReader/1.0)',
+      },
+    });
+
+    let contentType = upstream.headers.get('content-type') || '';
+    let buffer = Buffer.from(await upstream.arrayBuffer());
+
+    // Handle Google Drive virus-scan confirmation HTML page if returned
+    if (!contentType.includes('pdf') && buffer.subarray(0, 5).toString('ascii') !== '%PDF-') {
+      const htmlText = buffer.toString('utf8');
+      const confirmMatch = htmlText.match(/confirm=([0-9A-Za-z_-]+)/);
+      const uuidMatch = htmlText.match(/name="uuid"\s+value="([^"]+)"/);
+      if (confirmMatch || uuidMatch) {
+        const retryUrl = uuidMatch
+          ? `https://drive.usercontent.google.com/download?id=${encodeURIComponent(fileId)}&export=download&confirm=t&uuid=${encodeURIComponent(uuidMatch[1])}`
+          : `https://drive.google.com/uc?export=download&confirm=${encodeURIComponent(confirmMatch![1])}&id=${encodeURIComponent(fileId)}`;
+
+        upstream = await fetch(retryUrl, {
+          redirect: 'follow',
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (compatible; SmartKibReader/1.0)',
+          },
+        });
+        contentType = upstream.headers.get('content-type') || '';
+        buffer = Buffer.from(await upstream.arrayBuffer());
+      }
+    }
+
+    const isPdf = buffer.subarray(0, 5).toString('ascii') === '%PDF-' || contentType.includes('application/pdf');
+    if (!upstream.ok || !isPdf) {
+      res.status(422).json({
+        error:
+          'File Google Drive tidak dapat dimuat sebagai PDF. Pastikan akses file sudah diatur ke "Siapa saja yang memiliki link" (Public Viewer).',
+      });
+      return;
+    }
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Length', buffer.length.toString());
+    res.setHeader('Cache-Control', 'public, max-age=3600');
+    res.send(buffer);
+  } catch (err) {
+    console.error('Google Drive PDF proxy error:', err);
+    res.status(502).json({
+      error: 'Gagal mengambil file PDF dari Google Drive. Periksa koneksi atau gunakan PDF resmi terlampir.',
+    });
+  }
+});
+
 app.post('/api/chat', async (req: Request, res: Response) => {
   try {
     const { message, history, topic } = req.body;
