@@ -192,7 +192,7 @@ export const LibraryTab: React.FC = () => {
   const isShorof = selectedBook.category === 'shorof';
 
   const renderSidebarContent = (isMobileDrawer = false) => (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col flex-1 h-full min-h-0 overflow-hidden">
       {/* Sidebar Header */}
       <div className="p-4 sm:p-5 border-b border-slate-100 space-y-3.5 shrink-0">
         <div className="flex items-center justify-between gap-2">
@@ -238,7 +238,7 @@ export const LibraryTab: React.FC = () => {
       </div>
 
       {/* Scrollable Separated Books & Chapter Groups */}
-      <div className="flex-1 overflow-y-auto p-3.5 sm:p-4 space-y-4">
+      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-3.5 sm:p-4 pb-8 space-y-4">
         {groupedBooks.map(({ book, groups, matchCount }) => {
           const bookIsShorof = book.category === 'shorof';
           const isBookExpanded = searchQuery.trim().length > 0 ? matchCount > 0 : !!expandedBooks[book.id];
@@ -441,7 +441,7 @@ export const LibraryTab: React.FC = () => {
             className="fixed inset-0 bg-[#0C122C]/60 backdrop-blur-xs"
             onClick={() => setIsMobileSidebarOpen(false)}
           />
-          <aside className="relative z-10 w-[86%] max-w-sm bg-white h-full shadow-2xl flex flex-col">
+          <aside className="relative z-10 w-[86%] max-w-sm bg-white h-full min-h-0 shadow-2xl flex flex-col overflow-hidden">
             {renderSidebarContent(true)}
           </aside>
         </div>
@@ -451,7 +451,7 @@ export const LibraryTab: React.FC = () => {
       <div className="flex flex-col lg:flex-row gap-6 items-start">
         {/* Desktop Collapsible Sidebar */}
         {isDesktopSidebarOpen && (
-          <aside className="hidden lg:flex lg:flex-col w-84 xl:w-92 shrink-0 bg-white rounded-[2rem] bubble-column-card sticky top-20 max-h-[calc(100vh-6.5rem)] overflow-hidden">
+          <aside className="hidden lg:flex lg:flex-col w-84 xl:w-92 shrink-0 bg-white rounded-[2rem] bubble-column-card sticky top-24 h-[calc(100vh-7rem)] min-h-0 overflow-hidden">
             {renderSidebarContent(false)}
           </aside>
         )}
