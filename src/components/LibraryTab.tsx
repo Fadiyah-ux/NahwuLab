@@ -817,7 +817,7 @@ export const LibraryTab: React.FC = () => {
                 {selectedChapter.supplementImageUrl && showSupplementSheet && (
                   <div className="bg-white rounded-2xl p-4 shadow-sm space-y-2">
                     <div className="text-xs font-black text-slate-600">
-                      Lembar Pindaian Asli Kitab Amtsilah (Halaman Cetak Arab 10–11 — Mulhaq Ruba&apos;i Bab 1–4)
+                      Lembar Pindaian Asli Kitab Amtsilah (Halaman Cetak Arab 10–11 — Lanjutan Ruba&apos;i Mujarrad &amp; Mulhaq Bab 1–4)
                     </div>
                     <img
                       src={selectedChapter.supplementImageUrl}

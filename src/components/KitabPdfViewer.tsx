@@ -67,6 +67,8 @@ export const KitabPdfViewer: React.FC<KitabPdfViewerProps> = ({
   const [loading, setLoading] = useState<boolean>(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [renderedPageInfo, setRenderedPageInfo] = useState<{ page: number; total: number } | null>(null);
+  const onTotalPagesLoadedRef = useRef(onTotalPagesLoaded);
+  onTotalPagesLoadedRef.current = onTotalPagesLoaded;
 
   // Track responsive container width
   useEffect(() => {
@@ -97,7 +99,7 @@ export const KitabPdfViewer: React.FC<KitabPdfViewerProps> = ({
         const pdfDoc = await getCachedPdfDocument(src);
         if (cancelled) return;
 
-        onTotalPagesLoaded?.(pdfDoc.numPages);
+        onTotalPagesLoadedRef.current?.(pdfDoc.numPages);
         const safePage = Math.max(1, Math.min(pdfDoc.numPages, pageNumber));
         const page = await pdfDoc.getPage(safePage);
         if (cancelled) return;
@@ -150,7 +152,7 @@ export const KitabPdfViewer: React.FC<KitabPdfViewerProps> = ({
         }
       }
     };
-  }, [src, pageNumber, zoom, containerWidth, onTotalPagesLoaded]);
+  }, [src, pageNumber, zoom, containerWidth]);
 
   return (
     <div className="rounded-2xl overflow-hidden bg-slate-200/70 shadow-inner">
