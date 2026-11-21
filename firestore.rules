@@ -19,7 +19,7 @@ service cloud.firestore {
 
     function isAdmin() {
       return isSignedIn() && (
-        request.auth.token.email == 'izzahfadiyah649@gmail.com' ||
+        (request.auth.token.email == 'izzahfadiyah649@gmail.com' && request.auth.token.email_verified == true) ||
         exists(/databases/$(database)/documents/admins/$(request.auth.uid))
       );
     }
@@ -40,7 +40,7 @@ service cloud.firestore {
     function isValidUser(data) {
       return data.keys().hasAll(['uid', 'email', 'displayName', 'role', 'currentStreak', 'longestStreak']) &&
         data.keys().hasOnly(['uid', 'email', 'displayName', 'photoURL', 'role', 'currentStreak', 'longestStreak', 'lastLoginDate', 'lastActiveDate', 'streakStatus', 'missedDays', 'streakRecovery', 'recoveryHistory', 'totalExercisesCompleted', 'xp', 'createdAt', 'updatedAt']) &&
-        data.uid is string && data.uid.size() <= 128 &&
+        data.uid is string && data.uid.size() > 0 && data.uid.size() <= 128 &&
         data.email is string && data.email.size() <= 256 &&
         data.displayName is string && data.displayName.size() <= 100 &&
         data.role in ['admin', 'student'] &&
@@ -51,7 +51,7 @@ service cloud.firestore {
     function isValidStreakLog(data) {
       return data.keys().hasAll(['userId', 'date', 'activityType', 'timestamp']) &&
         data.keys().hasOnly(['userId', 'date', 'activityType', 'points', 'timestamp']) &&
-        data.userId is string && data.userId.size() <= 128 &&
+        data.userId is string && data.userId.size() > 0 && data.userId.size() <= 128 &&
         data.date is string && data.date.size() <= 20 &&
         data.activityType in ['chat', 'exercise', 'library', 'login'] &&
         data.timestamp is string && data.timestamp.size() <= 64;
@@ -60,22 +60,54 @@ service cloud.firestore {
     function isValidChatMessage(data) {
       return data.keys().hasAll(['id', 'userId', 'role', 'content', 'timestamp']) &&
         data.keys().hasOnly(['id', 'userId', 'role', 'content', 'topic', 'timestamp']) &&
-        data.id is string && data.id.size() <= 128 &&
-        data.userId is string && data.userId.size() <= 128 &&
+        data.id is string && data.id.size() > 0 && data.id.size() <= 128 &&
+        data.userId is string && data.userId.size() > 0 && data.userId.size() <= 128 &&
         data.role in ['user', 'assistant'] &&
         data.content is string && data.content.size() <= 10000 &&
         data.timestamp is string && data.timestamp.size() <= 64;
     }
 
+    function isValidQuizResult(data) {
+      return data.keys().hasAll([
+          'userId', 'chapterId', 'bookId', 'bookTitle', 'category',
+          'babNumber', 'titleIndo', 'answers', 'totalQuestions',
+          'correctCount', 'incorrectCount', 'score', 'accuracy',
+          'xpAwarded', 'locked', 'completedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'userId', 'chapterId', 'bookId', 'bookTitle', 'category',
+          'babNumber', 'titleIndo', 'answers', 'totalQuestions',
+          'correctCount', 'incorrectCount', 'score', 'accuracy',
+          'xpAwarded', 'locked', 'completedAt'
+        ]) &&
+        data.userId is string && data.userId.size() > 0 && data.userId.size() <= 128 &&
+        data.chapterId is string && data.chapterId.size() > 0 && data.chapterId.size() <= 128 &&
+        data.bookId in ['al-amtsilah-at-tashrifiyyah', 'mutammimah-al-jurumiyyah'] &&
+        data.bookTitle is string && data.bookTitle.size() > 0 && data.bookTitle.size() <= 200 &&
+        data.category in ['shorof', 'nahwu'] &&
+        data.babNumber is number && data.babNumber >= 1 && data.babNumber <= 60 &&
+        data.titleIndo is string && data.titleIndo.size() > 0 && data.titleIndo.size() <= 300 &&
+        data.answers is list && data.answers.size() > 0 && data.answers.size() <= 30 && data.answers[0] is number &&
+        data.totalQuestions is number && data.totalQuestions >= 1 && data.totalQuestions <= 30 &&
+        data.answers.size() == data.totalQuestions &&
+        data.correctCount is number && data.correctCount >= 0 && data.correctCount <= data.totalQuestions &&
+        data.incorrectCount is number && data.incorrectCount >= 0 && data.incorrectCount <= data.totalQuestions &&
+        data.score is number && data.score >= 0 && data.score <= 100 &&
+        data.accuracy is number && data.accuracy >= 0 && data.accuracy <= 100 &&
+        data.xpAwarded is number && data.xpAwarded >= 0 && data.xpAwarded <= 500 &&
+        data.locked is bool && data.locked == true &&
+        data.completedAt is string && data.completedAt.size() > 0 && data.completedAt.size() <= 64;
+    }
+
     function isValidExercise(data) {
       return data.keys().hasAll(['id', 'title', 'category', 'difficulty', 'question', 'options', 'correctAnswerIndex', 'explanation']) &&
         data.keys().hasOnly(['id', 'title', 'category', 'difficulty', 'question', 'arabicSnippet', 'options', 'correctAnswerIndex', 'explanation', 'createdBy']) &&
-        data.id is string && data.id.size() <= 128 &&
+        data.id is string && data.id.size() > 0 && data.id.size() <= 128 &&
         data.title is string && data.title.size() <= 200 &&
         data.category in ['nahwu', 'shorof', 'irab'] &&
         data.difficulty in ['pemula', 'menengah', 'mahir'] &&
         data.question is string && data.question.size() <= 1000 &&
-        data.options is list && data.options.size() <= 10 &&
+        data.options is list && data.options.size() > 0 && data.options.size() <= 10 && data.options[0] is string &&
         data.correctAnswerIndex is number &&
         data.explanation is string && data.explanation.size() <= 2000;
     }
@@ -83,7 +115,7 @@ service cloud.firestore {
     function isValidLibraryBook(data) {
       return data.keys().hasAll(['id', 'title', 'author', 'category', 'description']) &&
         data.keys().hasOnly(['id', 'title', 'author', 'category', 'description', 'level', 'chapters', 'isBuiltin']) &&
-        data.id is string && data.id.size() <= 128 &&
+        data.id is string && data.id.size() > 0 && data.id.size() <= 128 &&
         data.title is string && data.title.size() <= 200 &&
         data.author is string && data.author.size() <= 200 &&
         data.category in ['nahwu', 'shorof', 'irab', 'kaidah'] &&
@@ -92,7 +124,7 @@ service cloud.firestore {
 
     // Admins Collection
     match /admins/{adminId} {
-      allow get: if isSignedIn();
+      allow get: if isSignedIn() && isValidId(adminId);
       allow list: if isAdmin();
       allow create, update, delete: if isAdmin() && isValidId(adminId);
     }
@@ -100,7 +132,7 @@ service cloud.firestore {
     // USER DATA ISOLATION: Each user can ONLY read and write their OWN data
     match /users/{userId} {
       // User can only read their own document
-      allow get: if isOwner(userId) || isAdmin();
+      allow get: if (isOwner(userId) && isValidId(userId)) || isAdmin();
       allow list: if isAdmin();
 
       // User can only create their own profile matching their auth.uid
@@ -116,37 +148,46 @@ service cloud.firestore {
         )) || isAdmin()
       );
 
-      allow delete: if isAdmin();
+      allow delete: if isAdmin() && isValidId(userId);
 
       // Subcollection: Streak logs - Only owner can read/write their streak logs
       match /streakLogs/{date} {
-        allow get, list: if isOwner(userId) || isAdmin();
+        allow get: if (isOwner(userId) && isValidId(date)) || isAdmin();
+        allow list: if isOwner(userId) || isAdmin();
         allow create, update: if isOwner(userId) && isValidId(date) && isValidStreakLog(incoming()) && incoming().userId == request.auth.uid;
-        allow delete: if isOwner(userId) || isAdmin();
+        allow delete: if (isOwner(userId) && isValidId(date)) || isAdmin();
       }
 
       // Subcollection: Chat history - Only owner can read/write their AI consultations
       match /chats/{chatId} {
-        allow get, list: if isOwner(userId) || isAdmin();
+        allow get: if (isOwner(userId) && isValidId(chatId)) || isAdmin();
+        allow list: if isOwner(userId) || isAdmin();
         allow create, update: if isOwner(userId) && isValidId(chatId) && isValidChatMessage(incoming()) && incoming().userId == request.auth.uid;
-        allow delete: if isOwner(userId) || isAdmin();
+        allow delete: if (isOwner(userId) && isValidId(chatId)) || isAdmin();
       }
 
-      // Any nested custom data under users/{userId} is strictly owned by userId
-      match /{allSubcollections=**} {
-        allow read, write: if isOwner(userId) || isAdmin();
+      // Subcollection: Chapter Quiz Results - Strict one-time create-only lock (immutable after submission)
+      match /quizResults/{chapterId} {
+        allow get: if (isOwner(userId) && isValidId(chapterId)) || isAdmin();
+        allow list: if isOwner(userId) || isAdmin();
+        allow create: if isOwner(userId) && isValidId(chapterId) && isValidQuizResult(incoming()) && incoming().userId == request.auth.uid && incoming().chapterId == chapterId;
+        allow update, delete: if false;
       }
     }
 
     // Shared Learning Content: Signed-in users can read, only admin can create/edit/delete
     match /exercises/{exerciseId} {
-      allow get, list: if isSignedIn();
-      allow create, update, delete: if isAdmin() && isValidId(exerciseId) && (request.method == 'delete' || isValidExercise(incoming()));
+      allow get: if isSignedIn() && isValidId(exerciseId);
+      allow list: if isSignedIn();
+      allow create, update: if isAdmin() && isValidId(exerciseId) && isValidExercise(incoming());
+      allow delete: if isAdmin() && isValidId(exerciseId);
     }
 
     match /library/{bookId} {
-      allow get, list: if isSignedIn();
-      allow create, update, delete: if isAdmin() && isValidId(bookId) && (request.method == 'delete' || isValidLibraryBook(incoming()));
+      allow get: if isSignedIn() && isValidId(bookId);
+      allow list: if isSignedIn();
+      allow create, update: if isAdmin() && isValidId(bookId) && isValidLibraryBook(incoming());
+      allow delete: if isAdmin() && isValidId(bookId);
     }
   }
 }

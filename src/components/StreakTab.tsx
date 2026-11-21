@@ -460,7 +460,7 @@ export const StreakTab: React.FC = () => {
             </div>
 
             <p className="text-xs text-slate-600 font-medium mb-4">
-              Tingkatkan XP Anda dengan menyelesaikan kuis I&apos;rab, membaca materi kitab turats, dan berkonsultasi dengan Tanya Musyrif SmartKib.
+              Kumpulkan poin XP dengan menyelesaikan Latihan &amp; Kuis 115 Bab, serta jaga streak harian dengan membaca kitab turats atau berkonsultasi di Tanya Musyrif.
             </p>
 
             {/* Progress Bar */}
@@ -578,7 +578,7 @@ export const StreakTab: React.FC = () => {
           </div>
           <div>
             <h3 className="text-base font-black text-[#0C122C]">Target Belajar Harian (Daily Quests)</h3>
-            <p className="text-xs text-slate-500 font-medium">Selesaikan target harian untuk mengumpulkan bonus poin XP</p>
+            <p className="text-xs text-slate-500 font-medium">Jaga keistiqamahan belajar harian dan raih poin XP dari Latihan &amp; Kuis Bab</p>
           </div>
         </div>
 
@@ -590,8 +590,8 @@ export const StreakTab: React.FC = () => {
             <div>
               <h4 className="text-sm font-black text-[#0C122C]">1x Tanya Musyrif SmartKib</h4>
               <p className="text-xs text-slate-600 font-normal mt-0.5">Tanyakan 1 kaidah atau bedah kalimat I&apos;rab.</p>
-              <span className="inline-block mt-2 text-[10px] font-black text-[#FF2D78] bg-white px-2.5 py-0.5 rounded-full border border-[#FF2D78]/30 shadow-2xs">
-                +10 XP
+              <span className="inline-block mt-2 text-[10px] font-black text-[#FF2D78] bg-white px-2.5 py-0.5 rounded-lg border border-[#FF2D78]/30 shadow-2xs">
+                Jaga Streak Harian
               </span>
             </div>
           </div>
@@ -603,8 +603,8 @@ export const StreakTab: React.FC = () => {
             <div>
               <h4 className="text-sm font-black text-[#0C122C]">1x Baca Bab Kitab</h4>
               <p className="text-xs text-slate-600 font-normal mt-0.5">Telaah bab Muthammimah al-Jurumiyah atau Amtsilah Tasrifiyah.</p>
-              <span className="inline-block mt-2 text-[10px] font-black text-[#0284C7] bg-white px-2.5 py-0.5 rounded-full border border-[#00D2FF]/40 shadow-2xs">
-                +15 XP
+              <span className="inline-block mt-2 text-[10px] font-black text-[#0284C7] bg-white px-2.5 py-0.5 rounded-lg border border-[#00D2FF]/40 shadow-2xs">
+                Jaga Streak Harian
               </span>
             </div>
           </div>
@@ -614,10 +614,10 @@ export const StreakTab: React.FC = () => {
               <Award className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="text-sm font-black text-[#0C122C]">Selesaikan Latihan</h4>
-              <p className="text-xs text-slate-600 font-normal mt-0.5">Jawab kuis I&apos;rab atau wazan shorof.</p>
-              <span className="inline-block mt-2 text-[10px] font-black text-[#FF6B00] bg-white px-2.5 py-0.5 rounded-full border border-[#FFD233] shadow-2xs">
-                +20 XP
+              <h4 className="text-sm font-black text-[#0C122C]">Selesaikan Kuis Bab</h4>
+              <p className="text-xs text-slate-600 font-normal mt-0.5">Kerjakan latihan evaluasi dari 115 bab Sharaf &amp; Nahwu.</p>
+              <span className="inline-block mt-2 text-[10px] font-black text-[#B45309] bg-white px-2.5 py-0.5 rounded-lg border border-[#FFD233] shadow-2xs">
+                +5 XP / benar · +1 XP / selesai
               </span>
             </div>
           </div>

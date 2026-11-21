@@ -1,8 +1,9 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { SEED_BOOKS } from '../data/seedData';
 import { LibraryBookItem, BookChapter } from '../types';
 import {
+  Award,
   BookOpen,
   Search,
   BookMarked,
@@ -26,7 +27,17 @@ import { KitabPdfViewer } from './KitabPdfViewer';
 
 type ViewMode = 'combined' | 'pdf' | 'matan';
 
-export const LibraryTab: React.FC = () => {
+interface LibraryTabProps {
+  initialChapterId?: string | null;
+  onConsumeInitialChapter?: () => void;
+  onOpenQuizForChapter?: (chapterId: string) => void;
+}
+
+export const LibraryTab: React.FC<LibraryTabProps> = ({
+  initialChapterId,
+  onConsumeInitialChapter,
+  onOpenQuizForChapter,
+}) => {
   const { recordActivity } = useAuth();
   const [books] = useState<LibraryBookItem[]>(SEED_BOOKS);
   const [selectedBook, setSelectedBook] = useState<LibraryBookItem>(SEED_BOOKS[0]);
@@ -149,6 +160,24 @@ export const LibraryTab: React.FC = () => {
     setIsMobileSidebarOpen(false);
     recordActivity('library');
   };
+
+  useEffect(() => {
+    if (!initialChapterId) return;
+    for (const book of books) {
+      const found = book.chapters.find((c) => c.id === initialChapterId);
+      if (found) {
+        setSelectedBook(book);
+        setSelectedChapter(found);
+        setActivePdfPage(found.pdfPage);
+        setShowDriveConfig(false);
+        setShowSupplementSheet(true);
+        setExpandedBooks((prev) => ({ ...prev, [book.id]: true }));
+        recordActivity('library');
+        break;
+      }
+    }
+    onConsumeInitialChapter?.();
+  }, [initialChapterId, books, onConsumeInitialChapter]);
 
   const handleJumpPdfPage = (page: number) => {
     const clamped = Math.max(1, Math.min(effectiveTotalPages, page));
@@ -503,13 +532,13 @@ export const LibraryTab: React.FC = () => {
                   </span>
                 </div>
 
-                {/* Prev / Next Bab */}
-                <div className="flex items-center gap-1.5">
+                {/* Prev / Next Bab & Latihan Soal */}
+                <div className="flex flex-wrap items-center gap-1.5">
                   <button
                     type="button"
                     disabled={!prevChapter}
                     onClick={() => prevChapter && handleSelectChapter(selectedBook, prevChapter)}
-                    className="px-3 py-1.5 rounded-xl bg-white text-xs font-bold text-[#0C122C] hover:bg-[#E0F9FF] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer flex items-center gap-1 shadow-2xs transition-colors"
+                    className="px-3 py-1.5 rounded-xl bg-white text-xs font-bold text-[#0C122C] hover:bg-[#E0F9FF] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer flex items-center gap-1 shadow-2xs transition-colors whitespace-nowrap"
                   >
                     <ChevronLeft className="w-3.5 h-3.5" />
                     <span>Bab Seb.</span>
@@ -518,11 +547,21 @@ export const LibraryTab: React.FC = () => {
                     type="button"
                     disabled={!nextChapter}
                     onClick={() => nextChapter && handleSelectChapter(selectedBook, nextChapter)}
-                    className="px-3 py-1.5 rounded-xl bg-white text-xs font-bold text-[#0C122C] hover:bg-[#E0F9FF] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer flex items-center gap-1 shadow-2xs transition-colors"
+                    className="px-3 py-1.5 rounded-xl bg-white text-xs font-bold text-[#0C122C] hover:bg-[#E0F9FF] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer flex items-center gap-1 shadow-2xs transition-colors whitespace-nowrap"
                   >
                     <span>Bab Ber.</span>
                     <ChevronRight className="w-3.5 h-3.5" />
                   </button>
+                  {onOpenQuizForChapter && (
+                    <button
+                      type="button"
+                      onClick={() => onOpenQuizForChapter(selectedChapter.id)}
+                      className="px-3.5 py-1.5 rounded-xl bg-[#FF2D78] hover:bg-[#E02468] text-white text-xs font-black cursor-pointer inline-flex items-center gap-1.5 shadow-xs transition-colors whitespace-nowrap"
+                    >
+                      <Award className="w-3.5 h-3.5" />
+                      <span>LATIHAN SOAL</span>
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -907,33 +946,46 @@ export const LibraryTab: React.FC = () => {
                     </div>
                   )}
 
-                  {/* Mark Completed & Earn XP */}
+                  {/* Mark Completed & Direct CTA to BAB Quiz */}
                   <div className="pt-5 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div className="text-xs sm:text-sm text-slate-500 font-medium text-center sm:text-left">
-                      <span>Mengkaji bab ini menambah</span>{' '}
-                      <strong className="text-[#FF2D78] font-black">+15 XP</strong>{' '}
-                      <span>ke rekor belajar santri Anda.</span>
+                      <span>Mengkaji bab ini menjaga</span>{' '}
+                      <strong className="text-[#0C122C] font-black">Streak Belajar Harian</strong>{' '}
+                      <span>Anda. Kerjakan kuis bab untuk meraih poin XP.</span>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={() => {
-                        recordActivity('library');
-                        setCompletedChapters((prev) => ({ ...prev, [selectedChapter.id]: true }));
-                      }}
-                      className={`w-full sm:w-auto px-6 py-3.5 rounded-2xl font-black text-xs shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 ${
-                        completedChapters[selectedChapter.id]
-                          ? 'bg-[#0C122C] text-[#FFD233] shadow-[#0C122C]/20'
-                          : 'bg-[#FF2D78] hover:bg-[#E02468] text-white shadow-[#FF2D78]/25'
-                      }`}
-                    >
-                      <Check className="w-4 h-4 stroke-[3]" />
-                      <span>
-                        {completedChapters[selectedChapter.id]
-                          ? 'Bab Sudah Dicatat (+15 XP)'
-                          : 'Tandai Telah Mengkaji Bab Ini (+15 XP)'}
-                      </span>
-                    </button>
+                    <div className="flex flex-col sm:flex-row items-center gap-2.5 w-full sm:w-auto">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          recordActivity('library');
+                          setCompletedChapters((prev) => ({ ...prev, [selectedChapter.id]: true }));
+                        }}
+                        className={`w-full sm:w-auto px-5 py-3 rounded-2xl font-black text-xs transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 whitespace-nowrap ${
+                          completedChapters[selectedChapter.id]
+                            ? 'bg-[#0C122C] text-[#FFD233]'
+                            : 'bg-slate-100 hover:bg-[#FFF9D2] text-[#0C122C]'
+                        }`}
+                      >
+                        <Check className="w-4 h-4 stroke-[3]" />
+                        <span>
+                          {completedChapters[selectedChapter.id]
+                            ? 'Kajian Dicatat Hari Ini'
+                            : 'Tandai Telah Mengkaji Bab Ini'}
+                        </span>
+                      </button>
+
+                      {onOpenQuizForChapter && (
+                        <button
+                          type="button"
+                          onClick={() => onOpenQuizForChapter(selectedChapter.id)}
+                          className="w-full sm:w-auto px-6 py-3 rounded-2xl font-black text-xs bg-[#FF2D78] hover:bg-[#E02468] text-white shadow-md shadow-[#FF2D78]/25 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 whitespace-nowrap"
+                        >
+                          <Award className="w-4 h-4" />
+                          <span>LATIHAN SOAL</span>
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </>

@@ -69,6 +69,10 @@
           "type": "number",
           "description": "Total number of completed exercises"
         },
+        "xp": {
+          "type": "number",
+          "description": "Experience points earned strictly from completed quiz questions"
+        },
         "createdAt": {
           "type": "string",
           "description": "Account creation timestamp",
@@ -263,6 +267,102 @@
         }
       },
       "required": ["uid", "email"]
+    },
+    "QuizResult": {
+      "title": "QuizResult",
+      "description": "Immutable one-time completed BAB quiz result locked per user and chapter",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Owner user UID matching auth.uid",
+          "maxLength": 128
+        },
+        "chapterId": {
+          "type": "string",
+          "description": "Unique BAB chapter identifier",
+          "maxLength": 128
+        },
+        "bookId": {
+          "type": "string",
+          "description": "Source kitab identifier",
+          "enum": ["al-amtsilah-at-tashrifiyyah", "mutammimah-al-jurumiyyah"]
+        },
+        "bookTitle": {
+          "type": "string",
+          "description": "Source kitab display title",
+          "maxLength": 200
+        },
+        "category": {
+          "type": "string",
+          "description": "Kitab science category",
+          "enum": ["shorof", "nahwu"]
+        },
+        "babNumber": {
+          "type": "number",
+          "description": "Sequential BAB number within the kitab"
+        },
+        "titleIndo": {
+          "type": "string",
+          "description": "BAB title in Indonesian",
+          "maxLength": 300
+        },
+        "answers": {
+          "type": "array",
+          "description": "User selected 0-based option index per question"
+        },
+        "totalQuestions": {
+          "type": "number",
+          "description": "Total questions in this BAB quiz"
+        },
+        "correctCount": {
+          "type": "number",
+          "description": "Total correct answers"
+        },
+        "incorrectCount": {
+          "type": "number",
+          "description": "Total incorrect answers"
+        },
+        "score": {
+          "type": "number",
+          "description": "Final score on 0-100 scale"
+        },
+        "accuracy": {
+          "type": "number",
+          "description": "Accuracy percentage 0-100"
+        },
+        "xpAwarded": {
+          "type": "number",
+          "description": "XP awarded from this quiz submission"
+        },
+        "locked": {
+          "type": "boolean",
+          "description": "Permanent lock flag always true upon submission"
+        },
+        "completedAt": {
+          "type": "string",
+          "description": "ISO completion timestamp",
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "userId",
+        "chapterId",
+        "bookId",
+        "bookTitle",
+        "category",
+        "babNumber",
+        "titleIndo",
+        "answers",
+        "totalQuestions",
+        "correctCount",
+        "incorrectCount",
+        "score",
+        "accuracy",
+        "xpAwarded",
+        "locked",
+        "completedAt"
+      ]
     }
   },
   "firestore": {
@@ -277,6 +377,10 @@
     "/users/{userId}/chats/{chatId}": {
       "schema": "ChatMessage",
       "description": "AI consultation chat history for a specific user"
+    },
+    "/users/{userId}/quizResults/{chapterId}": {
+      "schema": "QuizResult",
+      "description": "Permanent locked one-time quiz result for a specific BAB chapter"
     },
     "/exercises/{exerciseId}": {
       "schema": "Exercise",

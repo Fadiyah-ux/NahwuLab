@@ -12,6 +12,20 @@ import { SEED_BOOKS } from './data/seedData';
 const MainLayout: React.FC = () => {
   const { userProfile, loading, isAdmin } = useAuth();
   const [activeTab, setActiveTab] = useState<string>('chat');
+  const [pendingQuizChapterId, setPendingQuizChapterId] = useState<string | null>(null);
+  const [pendingLibraryChapterId, setPendingLibraryChapterId] = useState<string | null>(null);
+
+  const handleOpenQuizForChapter = (chapterId: string) => {
+    setPendingQuizChapterId(chapterId);
+    setActiveTab('exercises');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleOpenLibraryChapter = (chapterId: string) => {
+    setPendingLibraryChapterId(chapterId);
+    setActiveTab('library');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   // Splash Screen - Refined per Requirement 6 & 1:
   // - Logo enlarged slightly, pure transparent without box/background
@@ -60,10 +74,18 @@ const MainLayout: React.FC = () => {
           <ChatTab />
         </div>
         <div className={activeTab === 'library' ? 'block' : 'hidden'}>
-          <LibraryTab />
+          <LibraryTab
+            initialChapterId={pendingLibraryChapterId}
+            onConsumeInitialChapter={() => setPendingLibraryChapterId(null)}
+            onOpenQuizForChapter={handleOpenQuizForChapter}
+          />
         </div>
         <div className={activeTab === 'exercises' ? 'block' : 'hidden'}>
-          <ExerciseTab />
+          <ExerciseTab
+            initialChapterId={pendingQuizChapterId}
+            onConsumeInitialChapter={() => setPendingQuizChapterId(null)}
+            onOpenLibraryChapter={handleOpenLibraryChapter}
+          />
         </div>
         <div className={activeTab === 'streak' ? 'block' : 'hidden'}>
           <StreakTab />

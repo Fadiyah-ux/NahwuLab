@@ -129,3 +129,61 @@ export interface SentenceAnalysisResult {
   words: WordAnalysis[];
   kitabReference?: string;
 }
+
+export type BabQuestionType =
+  | 'concept'
+  | 'rule_identification'
+  | 'example_analysis'
+  | 'rule_application'
+  | 'error_analysis';
+
+export interface BabQuestion {
+  id: string;
+  chapterId: string;
+  bookId: 'al-amtsilah-at-tashrifiyyah' | 'mutammimah-al-jurumiyyah';
+  type: BabQuestionType;
+  question: string;
+  arabicSnippet?: string;
+  options: [string, string, string, string];
+  correctAnswerIndex: 0 | 1 | 2 | 3;
+  explanation: string;
+  kitabReference: string;
+}
+
+export type BabQuizStatus = 'BELUM DIKERJAKAN' | 'SEDANG DIKERJAKAN' | 'SELESAI';
+
+export interface BabQuizMeta {
+  chapterId: string;
+  bookId: 'al-amtsilah-at-tashrifiyyah' | 'mutammimah-al-jurumiyyah';
+  bookTitle: string;
+  bookTitleArabic: string;
+  category: 'shorof' | 'nahwu';
+  babNumber: number;
+  groupTitle: string;
+  titleIndo: string;
+  titleArabic: string;
+  pdfPage: number;
+  pdfEndPage?: number;
+  questionCount: number;
+  isNonKaidah?: boolean;
+}
+
+export interface BabQuizResult {
+  userId: string;
+  chapterId: string;
+  bookId: 'al-amtsilah-at-tashrifiyyah' | 'mutammimah-al-jurumiyyah';
+  bookTitle: string;
+  category: 'shorof' | 'nahwu';
+  babNumber: number;
+  titleIndo: string;
+  answers: number[];
+  totalQuestions: number;
+  correctCount: number;
+  incorrectCount: number;
+  score: number;
+  accuracy: number;
+  xpAwarded: number;
+  locked: true;
+  completedAt: string;
+}
+

@@ -7,10 +7,18 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
 } from 'firebase/auth';
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, setDoc, updateDoc } from 'firebase/firestore';
 import { auth, db, googleProvider, testFirestoreConnection } from '../firebase/config';
 import { handleFirestoreError, OperationType } from '../firebase/errorHandler';
-import { UserProfile, StreakLogItem, StreakRecoveryData, StreakRecoveryLog } from '../types';
+import {
+  UserProfile,
+  StreakLogItem,
+  StreakRecoveryData,
+  StreakRecoveryLog,
+  BabQuestion,
+  BabQuizMeta,
+  BabQuizResult,
+} from '../types';
 import {
   getJakartaDateString,
   evaluateStreakStatus,
@@ -22,6 +30,8 @@ interface AuthContextType {
   userProfile: UserProfile | null;
   isAdmin: boolean;
   loading: boolean;
+  quizResults: Record<string, BabQuizResult>;
+  quizResultsLoading: boolean;
   loginWithGoogle: () => Promise<void>;
   loginWithEmail: (email: string, pass: string) => Promise<void>;
   registerWithEmail: (email: string, pass: string, name: string) => Promise<void>;
@@ -30,6 +40,11 @@ interface AuthContextType {
   refreshUserProfile: () => Promise<void>;
   incrementExercisesCompleted: (xpGain?: number) => Promise<void>;
   recordActivity: (activityType: 'chat' | 'exercise' | 'library') => Promise<void>;
+  submitBabQuizResult: (
+    meta: BabQuizMeta,
+    answers: number[],
+    questions: BabQuestion[]
+  ) => Promise<BabQuizResult>;
   startStreakRecovery: () => Promise<void>;
   saveRecoveryProgress: (data: Partial<StreakRecoveryData>) => Promise<void>;
   completeStreakRecovery: () => Promise<void>;
@@ -43,6 +58,47 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [quizResults, setQuizResults] = useState<Record<string, BabQuizResult>>({});
+  const [quizResultsLoading, setQuizResultsLoading] = useState<boolean>(false);
+
+  const loadDemoQuizResults = (uid: string): Record<string, BabQuizResult> => {
+    try {
+      const raw = localStorage.getItem(`smartkib_demo_quiz_results_${uid}`);
+      if (!raw) return {};
+      const parsed = JSON.parse(raw) as Record<string, BabQuizResult>;
+      const valid: Record<string, BabQuizResult> = {};
+      Object.entries(parsed).forEach(([key, item]) => {
+        if (item && item.locked === true && Array.isArray(item.answers)) {
+          valid[key] = item;
+        }
+      });
+      return valid;
+    } catch {
+      return {};
+    }
+  };
+
+  const loadUserQuizResults = async (uid: string) => {
+    setQuizResultsLoading(true);
+    try {
+      const snap = await getDocs(collection(db, 'users', uid, 'quizResults'));
+      const map: Record<string, BabQuizResult> = {};
+      snap.forEach((d) => {
+        const data = d.data() as BabQuizResult;
+        const key = data.chapterId || d.id;
+        map[key] = data;
+      });
+      setQuizResults(map);
+    } catch (err) {
+      try {
+        handleFirestoreError(err, OperationType.LIST, `users/${uid}/quizResults`);
+      } catch (loggedErr) {
+        console.error('Could not load user quizResults:', loggedErr);
+      }
+    } finally {
+      setQuizResultsLoading(false);
+    }
+  };
 
   // Synchronize user profile and evaluate streak state WITHOUT false increments
   const syncUserStreakAndProfile = async (
@@ -170,6 +226,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             streakRecovery: evaluated.streakRecovery ?? parsed.streakRecovery ?? null,
           };
           setUserProfile(activeAdmin);
+          setQuizResults(loadDemoQuizResults(activeAdmin.uid));
           setLoading(false);
           return;
         }
@@ -182,11 +239,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
       if (user && user.email) {
-        await syncUserStreakAndProfile(user.uid, user.email, user.displayName, user.photoURL);
+        await Promise.all([
+          syncUserStreakAndProfile(user.uid, user.email, user.displayName, user.photoURL),
+          loadUserQuizResults(user.uid),
+        ]);
       } else {
         const storedAdmin = localStorage.getItem('smartkib_admin_session') || localStorage.getItem('nahwulab_admin_session');
         if (!storedAdmin) {
           setUserProfile(null);
+          setQuizResults({});
         }
       }
       setLoading(false);
@@ -200,7 +261,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const cred = await signInWithPopup(auth, googleProvider);
       if (cred.user && cred.user.email) {
-        await syncUserStreakAndProfile(cred.user.uid, cred.user.email, cred.user.displayName, cred.user.photoURL);
+        await Promise.all([
+          syncUserStreakAndProfile(cred.user.uid, cred.user.email, cred.user.displayName, cred.user.photoURL),
+          loadUserQuizResults(cred.user.uid),
+        ]);
       }
     } catch (error) {
       console.error('Google Sign-in failed:', error);
@@ -219,7 +283,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         const cred = await signInWithEmailAndPassword(auth, cleanEmail, pass);
         if (cred.user) {
-          await syncUserStreakAndProfile(cred.user.uid, cleanEmail, 'Ustadzah Izzah Fadiyah (Admin)');
+          await Promise.all([
+            syncUserStreakAndProfile(cred.user.uid, cleanEmail, 'Ustadzah Izzah Fadiyah (Admin)'),
+            loadUserQuizResults(cred.user.uid),
+          ]);
           setLoading(false);
           return;
         }
@@ -243,6 +310,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         };
         localStorage.setItem('smartkib_admin_session', JSON.stringify(adminProfile));
         setUserProfile(adminProfile);
+        setQuizResults(loadDemoQuizResults(adminProfile.uid));
         setLoading(false);
         return;
       }
@@ -251,7 +319,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const cred = await signInWithEmailAndPassword(auth, cleanEmail, pass);
       if (cred.user && cred.user.email) {
-        await syncUserStreakAndProfile(cred.user.uid, cred.user.email, cred.user.displayName);
+        await Promise.all([
+          syncUserStreakAndProfile(cred.user.uid, cred.user.email, cred.user.displayName),
+          loadUserQuizResults(cred.user.uid),
+        ]);
       }
     } catch (error: any) {
       console.error('Email sign in error:', error);
@@ -291,6 +362,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     setCurrentUser(null);
     setUserProfile(null);
+    setQuizResults({});
   };
 
   const refreshUserProfile = async () => {
@@ -314,7 +386,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!userProfile) return;
     const todayStr = getJakartaDateString();
     const currentXp = typeof userProfile.xp === 'number' ? userProfile.xp : 0;
-    const pointsGained = activityType === 'exercise' ? 20 : activityType === 'library' ? 15 : 10;
+    // Streak tracking for chat & library keeps daily streak active with 0 XP;
+    // XP points come strictly from completed quiz exercises.
+    const pointsGained = activityType === 'exercise' ? 20 : 0;
     const newXp = currentXp + pointsGained;
 
     // Evaluate streak upon verified learning activity
@@ -362,6 +436,129 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } else {
       localStorage.setItem('smartkib_admin_session', JSON.stringify(updated));
     }
+  };
+
+  /**
+   * Finalizes and permanently locks a chapter quiz result (1:1 per BAB).
+   * Awards XP strictly from answered questions (5 XP per correct, 1 XP per completed).
+   */
+  const submitBabQuizResult = async (
+    meta: BabQuizMeta,
+    answers: number[],
+    questions: BabQuestion[]
+  ): Promise<BabQuizResult> => {
+    if (!userProfile) {
+      throw new Error('Silakan masuk ke akun Anda terlebih dahulu untuk menyimpan hasil kuis.');
+    }
+    if (quizResults[meta.chapterId]?.locked) {
+      throw new Error('Kuis bab ini telah selesai dan terkunci permanen.');
+    }
+    if (
+      questions.length === 0 ||
+      answers.length !== questions.length ||
+      answers.some((ans) => !Number.isInteger(ans) || ans < 0 || ans > 3)
+    ) {
+      throw new Error('Harap lengkapi seluruh jawaban soal sebelum melihat hasil.');
+    }
+
+    const totalQuestions = questions.length;
+    const correctCount = questions.reduce(
+      (acc, q, idx) => (answers[idx] === q.correctAnswerIndex ? acc + 1 : acc),
+      0
+    );
+    const incorrectCount = totalQuestions - correctCount;
+    const score = Math.round((correctCount / totalQuestions) * 100);
+    const accuracy = score;
+    const xpAwarded = correctCount * 5 + incorrectCount * 1;
+    const completedAt = new Date().toISOString();
+
+    const result: BabQuizResult = {
+      userId: userProfile.uid,
+      chapterId: meta.chapterId,
+      bookId: meta.bookId,
+      bookTitle: meta.bookTitle,
+      category: meta.category,
+      babNumber: meta.babNumber,
+      titleIndo: meta.titleIndo,
+      answers: [...answers],
+      totalQuestions,
+      correctCount,
+      incorrectCount,
+      score,
+      accuracy,
+      xpAwarded,
+      locked: true,
+      completedAt,
+    };
+
+    const todayStr = getJakartaDateString();
+    const currentXp = typeof userProfile.xp === 'number' ? userProfile.xp : 0;
+    const newXp = currentXp + xpAwarded;
+    const newCount = (userProfile.totalExercisesCompleted || 0) + totalQuestions;
+    const streakResult = calculateActivityStreak(userProfile);
+
+    const updatedProfile: UserProfile = {
+      ...userProfile,
+      totalExercisesCompleted: newCount,
+      xp: newXp,
+      currentStreak: streakResult.newStreak,
+      longestStreak: streakResult.newLongest,
+      lastActiveDate: streakResult.newLastActiveDate,
+      lastLoginDate: todayStr,
+      streakStatus: streakResult.streakStatus,
+      missedDays: streakResult.missedDays,
+      updatedAt: completedAt,
+    };
+
+    if (currentUser) {
+      try {
+        await setDoc(doc(db, 'users', userProfile.uid, 'quizResults', meta.chapterId), result);
+      } catch (err) {
+        handleFirestoreError(err, OperationType.CREATE, `users/${userProfile.uid}/quizResults/${meta.chapterId}`);
+      }
+
+      try {
+        await updateDoc(doc(db, 'users', userProfile.uid), {
+          totalExercisesCompleted: newCount,
+          xp: newXp,
+          currentStreak: streakResult.newStreak,
+          longestStreak: streakResult.newLongest,
+          lastActiveDate: streakResult.newLastActiveDate,
+          lastLoginDate: todayStr,
+          streakStatus: streakResult.streakStatus,
+          missedDays: streakResult.missedDays,
+          updatedAt: completedAt,
+        });
+
+        await setDoc(doc(db, 'users', userProfile.uid, 'streakLogs', `${todayStr}_exercise`), {
+          userId: userProfile.uid,
+          date: todayStr,
+          activityType: 'exercise',
+          points: xpAwarded,
+          timestamp: completedAt,
+        } as StreakLogItem);
+      } catch (profileErr) {
+        console.warn('Could not update user XP/streak after quiz result save:', profileErr);
+      }
+    } else {
+      const nextMap = { ...quizResults, [meta.chapterId]: result };
+      try {
+        localStorage.setItem(`smartkib_demo_quiz_results_${userProfile.uid}`, JSON.stringify(nextMap));
+        localStorage.setItem('smartkib_admin_session', JSON.stringify(updatedProfile));
+      } catch (storageErr) {
+        console.warn('LocalStorage persistence warning:', storageErr);
+      }
+    }
+
+    try {
+      localStorage.removeItem(`smartkib_quiz_draft_${userProfile.uid}_${meta.chapterId}`);
+    } catch {
+      // ignore storage cleanup errors
+    }
+
+    setQuizResults((prev) => ({ ...prev, [meta.chapterId]: result }));
+    setUserProfile(updatedProfile);
+    return result;
   };
 
   const incrementExercisesCompleted = async (xpGain: number = 20) => {
@@ -555,6 +752,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         userProfile,
         isAdmin,
         loading,
+        quizResults,
+        quizResultsLoading,
         loginWithGoogle,
         loginWithEmail,
         registerWithEmail,
@@ -563,6 +762,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         refreshUserProfile,
         incrementExercisesCompleted,
         recordActivity,
+        submitBabQuizResult,
         startStreakRecovery,
         saveRecoveryProgress,
         completeStreakRecovery,

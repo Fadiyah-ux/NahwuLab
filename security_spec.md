@@ -5,7 +5,8 @@
 2. **Immutable Identity**: When creating or updating a user document, `incoming().uid` must match `request.auth.uid`. An attacker cannot forge an owner UID.
 3. **Privilege Escalation Protection**: Regular users cannot promote themselves to `role: 'admin'`. Only the authorized administrator email (`izzahfadiyah649@gmail.com`) or designated admins in `/admins/` have admin privileges.
 4. **Learning Content Protection**: Public learning materials at `/exercises/{exerciseId}` and `/library/{bookId}` can be read by all authenticated users, but can **ONLY** be written, updated, or deleted by administrators.
-5. **Denial-of-Wallet & Type Guards**: String lengths, collection paths, and required schema attributes are strictly checked via validation functions (`isValidUser`, `isValidStreakLog`, `isValidChatMessage`, etc.).
+5. **Denial-of-Wallet & Type Guards**: String lengths, collection paths, and required schema attributes are strictly checked via validation functions (`isValidUser`, `isValidStreakLog`, `isValidChatMessage`, `isValidQuizResult`, etc.).
+6. **Immutable One-Time Quiz Lock**: Documents under `/users/{userId}/quizResults/{chapterId}` are strictly `create`-only by the owning user with `locked == true`, `chapterId == chapterId`, and `userId == request.auth.uid`. Updates and deletions are unconditionally rejected (`allow update, delete: if false`) so completed BAB quizzes cannot be retaken or altered.
 
 ## 2. Dirty Dozen Payloads (Verified Blocked by Rules)
 1. **Cross-User Profile Read**: User `A` requests `/users/B` -> `PERMISSION_DENIED`.
@@ -17,6 +18,10 @@
 7. **Malicious Exercise Tampering**: Student tries to edit or delete `/exercises/ex_1` -> `PERMISSION_DENIED`.
 8. **Malicious Library Overwrite**: Student writes to `/library/matan-al-jurumiyyah` -> `PERMISSION_DENIED`.
 9. **Admin Collection Injection**: Student writes document to `/admins/{their_uid}` -> `PERMISSION_DENIED`.
-10. **Ghost Field Injection**: Adding arbitrary fields `{ isHacked: true }` to `/users/{userId}` -> `PERMISSION_DENIED`.
-11. **Oversized Payload Attack**: Writing 500KB string into chat content -> `PERMISSION_DENIED`.
+10. **Ghost Field Injection**: Adding arbitrary fields `{ isHacked: true }` to `/users/{userId}` or `/users/{userId}/quizResults/{chapterId}` -> `PERMISSION_DENIED`.
+11. **Oversized Payload Attack**: Writing 500KB string into chat content or oversized answers list into `quizResults` -> `PERMISSION_DENIED`.
 12. **Blanket Query Scraping**: Running unbounded list query over all users without matching UID -> `PERMISSION_DENIED`.
+13. **Quiz Retake / Overwrite Attack**: User `A` attempts `updateDoc` or `setDoc` overwrite on existing `/users/A/quizResults/amtsilah-tsulatsi-1` -> `PERMISSION_DENIED`.
+14. **Quiz Delete / Reset Attack**: User `A` attempts `deleteDoc` on `/users/A/quizResults/amtsilah-tsulatsi-1` -> `PERMISSION_DENIED`.
+15. **Unlocked or Spoofed Quiz Submission**: User `A` submits `quizResults` with `locked: false` or mismatched `chapterId` -> `PERMISSION_DENIED`.
+
